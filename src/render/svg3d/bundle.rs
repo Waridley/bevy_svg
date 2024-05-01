@@ -3,6 +3,7 @@
 use bevy::{
     asset::Handle,
     ecs::bundle::Bundle,
+    pbr::{Material, StandardMaterial},
     render::{
         mesh::Mesh,
         view::{InheritedVisibility, ViewVisibility, Visibility},
@@ -15,9 +16,10 @@ use crate::{origin::Origin, svg::Svg};
 /// A Bevy [`Bundle`] representing an SVG entity.
 #[allow(missing_docs)]
 #[derive(Bundle)]
-pub struct Svg3dBundle {
+pub struct Svg3dBundle<M: Material = StandardMaterial> {
     pub svg: Handle<Svg>,
     pub mesh: Handle<Mesh>,
+    pub material: Handle<M>,
     /// [`Origin`] of the coordinate system and as such the origin for the Bevy position.
     pub origin: Origin,
     pub transform: Transform,
@@ -27,12 +29,13 @@ pub struct Svg3dBundle {
     pub view_visibility: ViewVisibility,
 }
 
-impl Default for Svg3dBundle {
+impl<M: Material> Default for Svg3dBundle<M> {
     /// Creates a default [`Svg3dBundle`].
     fn default() -> Self {
         Self {
             svg: Default::default(),
             mesh: Default::default(),
+            material: Default::default(),
             origin: Default::default(),
             transform: Transform::default(),
             global_transform: GlobalTransform::default(),
