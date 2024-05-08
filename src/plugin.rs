@@ -26,14 +26,14 @@ use bevy::{
     },
     hierarchy::DespawnRecursiveExt,
     log::debug,
-    prelude::{Last, PostUpdate},
+    prelude::Last,
     render::mesh::Mesh,
 };
 
 #[cfg(feature = "2d")]
 use bevy::sprite::Mesh2dHandle;
 
-use crate::{origin, render, svg::Svg};
+use crate::{render, svg::Svg};
 
 /// Sets for this plugin.
 #[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
@@ -47,14 +47,7 @@ pub struct SvgRenderPlugin;
 
 impl Plugin for SvgRenderPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostUpdate, (origin::add_origin_state.in_set(Set::SVG),))
-            .add_systems(
-                Last,
-                (
-                    origin::apply_origin,
-                    svg_mesh_linker.in_set(Set::SVG),
-                ),
-            )
+        app.add_systems(Last, (svg_mesh_linker.in_set(Set::SVG),))
             .add_plugins(render::SvgPlugin);
     }
 }

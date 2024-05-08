@@ -11,7 +11,7 @@ use bevy::{
     transform::components::{GlobalTransform, Transform},
 };
 
-use crate::{origin::Origin, svg::Svg};
+use crate::svg::Svg;
 
 /// A Bevy [`Bundle`] representing an SVG entity.
 #[allow(missing_docs)]
@@ -20,8 +20,6 @@ pub struct Svg3dBundle<M: Material = StandardMaterial> {
     pub svg: Handle<Svg>,
     pub mesh: Handle<Mesh>,
     pub material: Handle<M>,
-    /// [`Origin`] of the coordinate system and as such the origin for the Bevy position.
-    pub origin: Origin,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
     pub visibility: Visibility,
@@ -36,7 +34,6 @@ impl<M: Material> Default for Svg3dBundle<M> {
             svg: Default::default(),
             mesh: Default::default(),
             material: Default::default(),
-            origin: Default::default(),
             transform: Transform::default(),
             global_transform: GlobalTransform::default(),
             visibility: Visibility::default(),

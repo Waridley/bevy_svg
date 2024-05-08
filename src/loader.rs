@@ -1,23 +1,27 @@
 use bevy::{
     asset::{io::Reader, AssetLoader, AsyncReadExt, BoxedFuture, LoadContext},
     log::debug,
+    math::Vec2,
+    reflect::{Reflect, ReflectDeserialize, ReflectSerialize},
+    transform::components::Transform,
 };
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::svg::Svg;
+use crate::{origin::Origin, svg::Svg};
 
 #[derive(Default)]
 pub struct SvgAssetLoader;
 
 impl AssetLoader for SvgAssetLoader {
     type Asset = Svg;
-    type Settings = ();
+    type Settings = SvgSettings;
     type Error = FileSvgError;
 
     fn load<'load>(
         &'load self,
         reader: &'load mut Reader,
-        _settings: &'load (),
+        settings: &'load Self::Settings,
         load_context: &'load mut LoadContext,
     ) -> BoxedFuture<'load, Result<Self::Asset, Self::Error>> {
         Box::pin(async move {
@@ -31,7 +35,12 @@ impl AssetLoader for SvgAssetLoader {
                     path: load_context.path().display().to_string(),
                 })?;
 
-            let mut svg = Svg::from_bytes(&bytes, load_context.path(), None::<&std::path::Path>)?;
+            let mut svg = Svg::from_bytes(
+                &bytes,
+                load_context.path(),
+                None::<&std::path::Path>,
+                settings,
+            )?;
             let name = &load_context
                 .path()
                 .file_name()
@@ -44,7 +53,7 @@ impl AssetLoader for SvgAssetLoader {
             debug!("Parsing SVG: {} ... Done", load_context.path().display());
 
             debug!("Tessellating SVG: {} ...", load_context.path().display());
-            let mesh = svg.tessellate();
+            let mesh = svg.tessellate(settings);
             debug!(
                 "Tessellating SVG: {} ... Done",
                 load_context.path().display()
@@ -58,6 +67,34 @@ impl AssetLoader for SvgAssetLoader {
 
     fn extensions(&self) -> &[&str] {
         &["svg", "svgz"]
+    }
+}
+
+/// Settings for [SvgAssetLoader]
+#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
+#[serde(default)]
+#[reflect(Serialize, Deserialize)]
+pub struct SvgSettings {
+    /// Additional transform applied to all vertices when generating the `Mesh`.
+    pub transform: Transform,
+    /// [`Origin`] of the coordinate system and as such the origin for the Bevy position.
+    pub origin: Origin,
+    /// Override the computed size by scaling vertices.
+    pub size: Option<Vec2>,
+    #[cfg(feature = "3d")]
+    /// If present, each vertex will be duplicated with its z coordinate offset this amount.
+    pub depth: Option<f32>,
+}
+
+impl Default for SvgSettings {
+    fn default() -> Self {
+        Self {
+            transform: Transform::default(),
+            origin: Origin::default(),
+            size: None,
+            #[cfg(feature = "3d")]
+            depth: None,
+        }
     }
 }
 

@@ -1,23 +1,12 @@
 use bevy::{
-    asset::{Assets, Handle},
-    ecs::{
-        component::Component,
-        entity::Entity,
-        query::{Changed, Or, With, Without},
-        system::{Commands, Query, Res},
-    },
-    math::{Vec2, Vec3, Vec3Swizzles},
-    transform::components::{GlobalTransform, Transform},
+    math::{Vec2, Vec3},
+    reflect::{Reflect, ReflectDeserialize, ReflectSerialize},
 };
 
-#[cfg(feature = "3d")]
-use bevy::render::mesh::Mesh;
-#[cfg(feature = "2d")]
-use bevy::sprite::Mesh2dHandle;
+use serde::{Deserialize, Serialize};
 
-use crate::svg::Svg;
-
-#[derive(Clone, Component, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Reflect, Serialize, Deserialize)]
+#[reflect(Serialize, Deserialize)]
 /// Origin of the coordinate system.
 pub enum Origin {
     /// Bottom left of the image or viewbox.
@@ -44,87 +33,6 @@ impl Origin {
             // Standard SVG origin is top left, so we don't need to do anything
             Origin::TopLeft => Vec3::ZERO,
             Origin::TopRight => Vec3::new(-scaled_size.x, 0.0, 0.0),
-        }
-    }
-}
-
-#[derive(Clone, Component, Copy, Debug, PartialEq)]
-pub(crate) struct OriginState {
-    previous: Origin,
-}
-
-#[cfg(feature = "2d")]
-#[cfg(not(feature = "3d"))]
-type WithMesh = With<Mesh2dHandle>;
-#[cfg(not(feature = "2d"))]
-#[cfg(feature = "3d")]
-type WithMesh = With<Handle<Mesh>>;
-#[cfg(all(feature = "2d", feature = "3d"))]
-type WithMesh = Or<(With<Mesh2dHandle>, With<Handle<Mesh>>)>;
-
-/// Checkes if a "new" SVG bundle was added by looking for a missing OriginState
-/// and then adds it to the entity.
-pub(crate) fn add_origin_state(
-    mut commands: Commands,
-    query: Query<Entity, (With<Handle<Svg>>, WithMesh, Without<OriginState>)>,
-) {
-    for entity in &query {
-        commands.entity(entity).insert(OriginState {
-            previous: Origin::default(),
-        });
-    }
-}
-
-#[cfg(feature = "2d")]
-#[cfg(not(feature = "3d"))]
-type ChangedMesh = Changed<Mesh2dHandle>;
-#[cfg(not(feature = "2d"))]
-#[cfg(feature = "3d")]
-type ChangedMesh = Changed<Handle<Mesh>>;
-#[cfg(all(feature = "2d", feature = "3d"))]
-type ChangedMesh = Or<(Changed<Mesh2dHandle>, Changed<Handle<Mesh>>)>;
-
-/// Gets all SVGs with a changed origin or transform and checks if the origin offset
-/// needs to be applied.
-pub(crate) fn apply_origin(
-    svgs: Res<Assets<Svg>>,
-    mut query: Query<
-        (
-            Entity,
-            &Handle<Svg>,
-            &Origin,
-            &mut OriginState,
-            &Transform,
-            &mut GlobalTransform,
-        ),
-        Or<(Changed<Origin>, Changed<Transform>, ChangedMesh)>,
-    >,
-) {
-    for (_, svg_handle, origin, mut origin_state, transform, mut global_transform) in &mut query {
-        if let Some(svg) = svgs.get(svg_handle) {
-            if origin_state.previous != *origin {
-                let scaled_size = svg.size * transform.scale.xy();
-                let reverse_origin_translation =
-                    origin_state.previous.compute_translation(scaled_size);
-                let origin_translation = origin.compute_translation(scaled_size);
-
-                let mut gtransf = global_transform.compute_transform();
-                gtransf.translation.x += origin_translation.x - reverse_origin_translation.x;
-                gtransf.translation.y += origin_translation.y - reverse_origin_translation.y;
-                gtransf.translation.z += origin_translation.z - reverse_origin_translation.z;
-                *global_transform = GlobalTransform::from(gtransf);
-
-                origin_state.previous = origin.clone();
-            } else {
-                let scaled_size = svg.size * transform.scale.xy();
-                let origin_translation = origin.compute_translation(scaled_size);
-
-                let mut gtransf = global_transform.compute_transform();
-                gtransf.translation.x += origin_translation.x;
-                gtransf.translation.y += origin_translation.y;
-                gtransf.translation.z += origin_translation.z;
-                *global_transform = GlobalTransform::from(gtransf);
-            }
         }
     }
 }

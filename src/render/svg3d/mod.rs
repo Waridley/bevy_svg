@@ -1,5 +1,3 @@
-use bevy::{asset::Handle, render::render_resource::Shader};
-
 mod bundle;
 mod plugin;
 

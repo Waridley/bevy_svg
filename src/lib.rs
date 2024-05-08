@@ -32,7 +32,7 @@ mod origin;
 #[cfg(any(feature = "2d", feature = "3d"))]
 mod plugin;
 mod render;
-mod resources;
+// mod resources;
 mod svg;
 
 /// Import this module as `use bevy_svg::prelude::*` to get convenient imports.
@@ -49,10 +49,11 @@ pub mod prelude {
         FillOptions, FillRule, LineCap, LineJoin, Orientation, StrokeOptions,
     };
 }
+pub use loader::{SvgAssetLoader, SvgSettings};
 
 #[cfg(any(feature = "2d", feature = "3d"))]
 use crate::plugin::SvgRenderPlugin;
-use crate::{loader::SvgAssetLoader, svg::Svg};
+use crate::svg::Svg;
 use bevy::{
     app::{App, Plugin},
     asset::AssetApp,

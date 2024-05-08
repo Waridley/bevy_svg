@@ -1,7 +1,10 @@
 use bevy::{
     math::Vec3,
     render::{
-        color::Color, mesh::{Indices, Mesh}, render_asset::RenderAssetUsages, render_resource::PrimitiveTopology
+        color::Color,
+        mesh::{Indices, Mesh},
+        render_asset::RenderAssetUsages,
+        render_resource::PrimitiveTopology,
     },
     transform::components::Transform,
 };
@@ -16,8 +19,8 @@ use crate::Convert;
 /// [`Mesh`](bevy::render::mesh::Mesh).
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) struct Vertex {
-    position: [f32; 3],
-    color: [f32; 4],
+    pub(crate) position: [f32; 3],
+    pub(crate) color: [f32; 4],
 }
 
 /// The index type of a Bevy [`Mesh`](bevy::render::mesh::Mesh).
@@ -36,10 +39,19 @@ impl Convert<Mesh> for VertexBuffers {
             colors.alloc().init(vert.color);
         }
 
-        let mut mesh = Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default());
+        let mut mesh = Mesh::new(
+            PrimitiveTopology::TriangleList,
+            RenderAssetUsages::default(),
+        );
         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
         mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
         mesh.insert_indices(Indices::U32(self.indices));
+
+        #[cfg(feature = "3d")]
+        {
+            mesh.duplicate_vertices();
+            mesh.compute_flat_normals();
+        }
 
         mesh
     }

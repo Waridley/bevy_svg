@@ -14,7 +14,11 @@ use lyon_tessellation::{math::Point, FillTessellator, StrokeTessellator};
 use svgtypes::ViewBox;
 use usvg::NodeExt;
 
-use crate::{loader::FileSvgError, render::tessellation, Convert};
+use crate::{
+    loader::{FileSvgError, SvgSettings},
+    render::tessellation,
+    Convert,
+};
 
 /// A loaded and deserialized SVG file.
 #[derive(AsBindGroup, Reflect, Debug, Clone, Asset)]
@@ -57,6 +61,7 @@ impl Svg {
         bytes: &[u8],
         path: impl Into<PathBuf>,
         fonts: Option<impl Into<PathBuf>>,
+        settings: &SvgSettings,
     ) -> Result<Svg, FileSvgError> {
         let mut opts = usvg::Options::default();
         opts.fontdb.load_system_fonts();
@@ -69,34 +74,44 @@ impl Svg {
                 path: format!("{}", path.into().display()),
             })?;
 
-        Ok(Svg::from_tree(svg_tree))
+        Ok(Svg::from_tree(svg_tree, settings))
     }
 
     /// Creates a bevy mesh from the SVG data.
-    pub fn tessellate(&self) -> Mesh {
+    pub fn tessellate(&self, settings: &SvgSettings) -> Mesh {
         let buffer = tessellation::generate_buffer(
             self,
             &mut FillTessellator::new(),
             &mut StrokeTessellator::new(),
+            settings,
         );
         buffer.convert()
     }
 
-    pub(crate) fn from_tree(tree: usvg::Tree) -> Svg {
+    pub(crate) fn from_tree(tree: usvg::Tree, settings: &SvgSettings) -> Svg {
+        let tree_size = Vec2::new(tree.size.width() as f32, tree.size.height() as f32);
         let view_box = tree.view_box;
-        let size = tree.size;
+        let size = if let Some(size) = settings.size {
+            size
+        } else {
+            tree_size
+        };
         let mut descriptors = Vec::new();
 
         for node in tree.root.descendants() {
             match &*node.borrow() {
                 usvg::NodeKind::Path(path) => {
                     let t = node.abs_transform();
-                    let abs_t = Transform::from_matrix(Mat4::from_cols(
+                    let mut abs_t = Transform::from_matrix(Mat4::from_cols(
                         [t.a.abs() as f32, t.b as f32, 0.0, 0.0].into(),
                         [t.c as f32, t.d.abs() as f32, 0.0, 0.0].into(),
                         [0.0, 0.0, 1.0, 0.0].into(),
                         [t.e as f32, t.f as f32, 0.0, 1.0].into(),
                     ));
+                    let scale = if let Some(size) = settings.size {
+                        abs_t.scale.x *= size.x / tree_size.x;
+                        abs_t.scale.y *= size.y / tree_size.y;
+                    };
 
                     if let Some(fill) = &path.fill {
                         let color = match fill.paint {
@@ -131,7 +146,7 @@ impl Svg {
 
         return Svg {
             name: Default::default(),
-            size: Vec2::new(size.width() as f32, size.height() as f32),
+            size,
             view_box: ViewBox {
                 x: view_box.rect.x(),
                 y: view_box.rect.y(),
