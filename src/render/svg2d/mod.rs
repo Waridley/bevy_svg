@@ -1,5 +1,5 @@
 mod bundle;
 mod plugin;
 
-pub use bundle::Svg2dBundle;
+pub use bundle::{SvgMesh2dBundle, SvgMesh2d};
 pub use plugin::RenderPlugin;

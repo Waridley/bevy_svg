@@ -15,7 +15,7 @@ pub struct SvgAssetLoader;
 
 impl AssetLoader for SvgAssetLoader {
     type Asset = Svg;
-    type Settings = SvgSettings;
+    type Settings = ();
     type Error = FileSvgError;
 
     fn load<'load>(
@@ -39,7 +39,6 @@ impl AssetLoader for SvgAssetLoader {
                 &bytes,
                 load_context.path(),
                 None::<&std::path::Path>,
-                settings,
             )?;
             let name = &load_context
                 .path()
@@ -52,49 +51,12 @@ impl AssetLoader for SvgAssetLoader {
             svg.name = name.to_string();
             debug!("Parsing SVG: {} ... Done", load_context.path().display());
 
-            debug!("Tessellating SVG: {} ...", load_context.path().display());
-            let mesh = svg.tessellate(settings);
-            debug!(
-                "Tessellating SVG: {} ... Done",
-                load_context.path().display()
-            );
-            let mesh_handle = load_context.add_labeled_asset("mesh".to_string(), mesh);
-            svg.mesh = mesh_handle;
-
             Ok(svg)
         })
     }
 
     fn extensions(&self) -> &[&str] {
         &["svg", "svgz"]
-    }
-}
-
-/// Settings for [SvgAssetLoader]
-#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
-#[serde(default)]
-#[reflect(Serialize, Deserialize)]
-pub struct SvgSettings {
-    /// Additional transform applied to all vertices when generating the `Mesh`.
-    pub transform: Transform,
-    /// [`Origin`] of the coordinate system and as such the origin for the Bevy position.
-    pub origin: Origin,
-    /// Override the computed size by scaling vertices.
-    pub size: Option<Vec2>,
-    #[cfg(feature = "3d")]
-    /// If present, each vertex will be duplicated with its z coordinate offset this amount.
-    pub depth: Option<f32>,
-}
-
-impl Default for SvgSettings {
-    fn default() -> Self {
-        Self {
-            transform: Transform::default(),
-            origin: Origin::default(),
-            size: None,
-            #[cfg(feature = "3d")]
-            depth: None,
-        }
     }
 }
 

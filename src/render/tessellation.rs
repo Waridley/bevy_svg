@@ -3,11 +3,11 @@ use bevy::{
     math::Vec3,
     transform::components::Transform,
 };
+use bevy::math::Vec2;
 use lyon_tessellation::{BuffersBuilder, FillOptions, FillTessellator, StrokeTessellator};
 
 use crate::{
-    loader::SvgSettings,
-    render::vertex_buffer::{BufferExt, IndexType, Vertex, VertexBuffers, VertexConstructor},
+    render::{SvgMesh3d, vertex_buffer::{BufferExt, IndexType, Vertex, VertexBuffers, VertexConstructor}},
     svg::{DrawType, Svg},
 };
 
@@ -15,7 +15,7 @@ pub(crate) fn generate_buffer(
     svg: &Svg,
     fill_tess: &mut FillTessellator,
     stroke_tess: &mut StrokeTessellator,
-    settings: &SvgSettings,
+    settings: &SvgMesh3d,
 ) -> VertexBuffers {
     debug!("Tessellating SVG: {}", svg.name);
 
@@ -27,13 +27,15 @@ pub(crate) fn generate_buffer(
         #[cfg(not(feature = "3d"))]
         Vec3::ZERO
     };
-    let transform = settings.transform
-        * Transform {
-            translation: settings.origin.compute_translation(svg.size) + front_z,
-            // Bevy has a different y-axis origin, so we need to flip that axis
-            scale: Vec3::new(1.0, -1.0, 1.0),
-            ..Default::default()
-        };
+    let size = settings.size.unwrap_or(svg.size);
+    let scale = settings.size.map(|size| size / svg.size)
+      .unwrap_or(Vec2::ONE);
+    let transform = Transform {
+        translation: settings.rotation * (settings.origin.compute_translation(size) + front_z),
+        rotation: settings.rotation,
+        // Bevy has a different y-axis origin, so we need to flip that axis
+        scale: Vec3::new(scale.x, -scale.y, 1.0),
+    };
 
     let mut buffers = VertexBuffers::new();
 
@@ -41,7 +43,6 @@ pub(crate) fn generate_buffer(
         let mut buffer = VertexBuffers::new();
 
         let transform = transform * path.abs_transform;
-        let depth = settings.depth;
         let mut builder = BuffersBuilder::new(
             &mut buffer,
             VertexConstructor {
@@ -53,7 +54,7 @@ pub(crate) fn generate_buffer(
             DrawType::Fill => {
                 if let Err(e) = fill_tess.tessellate(
                     path.segments.clone(),
-                    &FillOptions::tolerance(0.001),
+                    &FillOptions::tolerance(settings.tolerance),
                     &mut builder,
                 ) {
                     error!("FillTessellator error: {:?}", e)

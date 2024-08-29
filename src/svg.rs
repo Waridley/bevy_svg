@@ -7,6 +7,7 @@ use bevy::{
     render::{color::Color, mesh::Mesh, render_resource::AsBindGroup},
     transform::components::Transform,
 };
+use bevy::utils::HashMap;
 use copyless::VecHelper;
 use lyon_geom::euclid::default::Transform2D;
 use lyon_path::PathEvent;
@@ -15,10 +16,11 @@ use svgtypes::ViewBox;
 use usvg::NodeExt;
 
 use crate::{
-    loader::{FileSvgError, SvgSettings},
+    loader::FileSvgError,
     render::tessellation,
     Convert,
 };
+use crate::render::SvgMesh3d;
 
 /// A loaded and deserialized SVG file.
 #[derive(AsBindGroup, Reflect, Debug, Clone, Asset)]
@@ -34,8 +36,6 @@ pub struct Svg {
     #[reflect(ignore)]
     /// All paths that make up the SVG.
     pub paths: Vec<PathDescriptor>,
-    /// The fully tessellated paths as [`Mesh`].
-    pub mesh: Handle<Mesh>,
 }
 
 impl Default for Svg {
@@ -50,7 +50,6 @@ impl Default for Svg {
                 h: 0.,
             },
             paths: Default::default(),
-            mesh: Default::default(),
         }
     }
 }
@@ -61,7 +60,6 @@ impl Svg {
         bytes: &[u8],
         path: impl Into<PathBuf>,
         fonts: Option<impl Into<PathBuf>>,
-        settings: &SvgSettings,
     ) -> Result<Svg, FileSvgError> {
         let mut opts = usvg::Options::default();
         opts.fontdb.load_system_fonts();
@@ -74,11 +72,11 @@ impl Svg {
                 path: format!("{}", path.into().display()),
             })?;
 
-        Ok(Svg::from_tree(svg_tree, settings))
+        Ok(Svg::from_tree(svg_tree))
     }
 
     /// Creates a bevy mesh from the SVG data.
-    pub fn tessellate(&self, settings: &SvgSettings) -> Mesh {
+    pub fn tessellate(&self, settings: &SvgMesh3d) -> Mesh {
         let buffer = tessellation::generate_buffer(
             self,
             &mut FillTessellator::new(),
@@ -88,14 +86,9 @@ impl Svg {
         buffer.convert()
     }
 
-    pub(crate) fn from_tree(tree: usvg::Tree, settings: &SvgSettings) -> Svg {
-        let tree_size = Vec2::new(tree.size.width() as f32, tree.size.height() as f32);
+    pub(crate) fn from_tree(tree: usvg::Tree) -> Svg {
+        let size = Vec2::new(tree.size.width() as f32, tree.size.height() as f32);
         let view_box = tree.view_box;
-        let size = if let Some(size) = settings.size {
-            size
-        } else {
-            tree_size
-        };
         let mut descriptors = Vec::new();
 
         for node in tree.root.descendants() {
@@ -108,10 +101,6 @@ impl Svg {
                         [0.0, 0.0, 1.0, 0.0].into(),
                         [t.e as f32, t.f as f32, 0.0, 1.0].into(),
                     ));
-                    let scale = if let Some(size) = settings.size {
-                        abs_t.scale.x *= size.x / tree_size.x;
-                        abs_t.scale.y *= size.y / tree_size.y;
-                    };
 
                     if let Some(fill) = &path.fill {
                         let color = match fill.paint {
@@ -154,7 +143,6 @@ impl Svg {
                 h: view_box.rect.height(),
             },
             paths: descriptors,
-            mesh: Default::default(),
         };
     }
 }

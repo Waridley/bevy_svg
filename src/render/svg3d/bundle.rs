@@ -10,14 +10,15 @@ use bevy::{
     },
     transform::components::{GlobalTransform, Transform},
 };
-
+use crate::render::SvgMesh3d;
 use crate::svg::Svg;
 
 /// A Bevy [`Bundle`] representing an SVG entity.
 #[allow(missing_docs)]
 #[derive(Bundle)]
-pub struct Svg3dBundle<M: Material = StandardMaterial> {
+pub struct SvgMesh3dBundle<M: Material = StandardMaterial> {
     pub svg: Handle<Svg>,
+    pub mesh_settings: SvgMesh3d,
     pub mesh: Handle<Mesh>,
     pub material: Handle<M>,
     pub transform: Transform,
@@ -27,11 +28,12 @@ pub struct Svg3dBundle<M: Material = StandardMaterial> {
     pub view_visibility: ViewVisibility,
 }
 
-impl<M: Material> Default for Svg3dBundle<M> {
-    /// Creates a default [`Svg3dBundle`].
+impl<M: Material> Default for SvgMesh3dBundle<M> {
+    /// Creates a default [`SvgMesh3dBundle`].
     fn default() -> Self {
         Self {
             svg: Default::default(),
+            mesh_settings: Default::default(),
             mesh: Default::default(),
             material: Default::default(),
             transform: Transform::default(),
@@ -42,3 +44,4 @@ impl<M: Material> Default for Svg3dBundle<M> {
         }
     }
 }
+
