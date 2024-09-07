@@ -103,7 +103,7 @@ pub struct DontChange;
 /// origin when 'O' is pressed.
 fn keyboard_input_system(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut svg_query: Query<(&mut Origin, &mut Visibility), (With<Handle<Svg>>, Without<DontChange>)>,
+    mut svg_query: Query<(&mut SvgMesh2d, &mut Visibility), (With<Handle<Svg>>, Without<DontChange>)>,
     mut ui_query: Query<
         &mut Visibility,
         (
@@ -121,8 +121,8 @@ fn keyboard_input_system(
             };
         }
     } else if keyboard_input.just_pressed(KeyCode::KeyO) {
-        for (mut origin, _) in svg_query.iter_mut() {
-            *origin = match origin.as_ref() {
+        for (mut settings, _) in svg_query.iter_mut() {
+            settings.origin = match settings.as_ref().origin {
                 Origin::BottomLeft => Origin::BottomRight,
                 Origin::BottomRight => Origin::TopRight,
                 Origin::Center => Origin::BottomLeft,
@@ -293,12 +293,16 @@ fn setup_origin_text(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn origin_text_update_system(
-    mut text_query: Query<&mut Text, (With<OriginText>, Without<Origin>)>,
-    query: Query<&Origin, Without<Text>>,
+    mut text_query: Query<&mut Text, (With<OriginText>, Without<SvgMesh2d>, Without<SvgMesh3d>)>,
+    query: Query<AnyOf<(&SvgMesh2d, &SvgMesh3d)>, (Without<Text>, Or<(Changed<SvgMesh2d>, Changed<SvgMesh3d>)>)>,
 ) {
     for mut text in &mut text_query {
-        if let Some(origin) = query.iter().next() {
-            text.sections[1].value = format!("{origin:?}");
+        match query.iter().next() {
+            Some((Some(SvgMesh2d { origin, .. }), _)) |
+            Some((None, Some(SvgMesh3d { origin, .. }))) => {
+                text.sections[1].value = format!("{:?}", origin);
+            }
+            _ => {}
         }
     }
 }

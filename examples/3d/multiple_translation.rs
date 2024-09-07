@@ -25,9 +25,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let svg = asset_server.load("asteroid_field.svg");
     commands.spawn(Camera3dBundle::default());
     commands.spawn((
-        Svg3dBundle {
+        SvgMesh3dBundle {
             svg,
-            origin: Origin::Center,
+            mesh_settings: SvgMesh3d {
+                origin: Origin::Center,
+                ..default()
+            },
             transform: Transform {
                 translation: Vec3::new(100.0, 0.0, -600.0),
                 scale: Vec3::new(2.0, 2.0, 1.0),
@@ -40,9 +43,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let svg = asset_server.load("neutron_star.svg");
     commands.spawn((
-        Svg3dBundle {
+        SvgMesh3dBundle {
             svg,
-            origin: Origin::Center,
+            mesh_settings: SvgMesh3d {
+                origin: Origin::Center,
+                ..default()
+            },
             transform: Transform {
                 translation: Vec3::new(0.0, 0.0, -600.0),
                 ..Default::default()

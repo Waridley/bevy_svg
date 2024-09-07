@@ -23,15 +23,21 @@ fn main() {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let svg = asset_server.load("box.svg");
     commands.spawn(Camera2dBundle::default());
-    commands.spawn(Svg2dBundle {
+    commands.spawn(SvgMesh2dBundle {
         svg: svg.clone(),
-        origin: Origin::Center,
+        mesh_settings: SvgMesh2d {
+            origin: Origin::Center,
+            ..default()
+        },
         ..Default::default()
     });
     commands.spawn((
-        Svg2dBundle {
+        SvgMesh2dBundle {
             svg,
-            origin: Origin::TopLeft,
+            mesh_settings: SvgMesh2d {
+                origin: Origin::TopLeft,
+                ..default()
+            },
             ..Default::default()
         },
         common::DontChange,

@@ -26,9 +26,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         transform: Transform::from_xyz(5.0, 8.0, 8.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..Default::default()
     });
-    commands.spawn(Svg3dBundle {
+    commands.spawn(SvgMesh3dBundle {
         svg,
-        origin: Origin::Center,
+        mesh_settings: SvgMesh3d {
+            origin: Origin::Center,
+            ..default()
+        },
         transform: Transform {
             translation: Vec3::new(0.0, 0.0, -1.0),
             scale: Vec3::new(0.01, 0.01, 1.0),

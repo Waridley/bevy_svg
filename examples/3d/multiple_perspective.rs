@@ -27,9 +27,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             .looking_at(Vec3::new(0.0, 0.0, -600.0), Vec3::Y),
         ..Default::default()
     });
-    commands.spawn(Svg3dBundle {
+    commands.spawn(SvgMesh3dBundle {
         svg: svg.clone(),
-        origin: Origin::Center,
+        mesh_settings: SvgMesh3d {
+            origin: Origin::Center,
+            ..default()
+        },
         transform: Transform {
             translation: Vec3::new(0.0, 0.0, -600.0),
             rotation: Quat::from_rotation_x(-std::f32::consts::PI * 3.0),
@@ -37,9 +40,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         ..Default::default()
     });
-    commands.spawn(Svg3dBundle {
+    commands.spawn(SvgMesh3dBundle {
         svg: svg.clone(),
-        origin: Origin::Center,
+        mesh_settings: SvgMesh3d {
+            origin: Origin::Center,
+            ..default()
+        },
         transform: Transform {
             translation: Vec3::new(0.0, 0.0, -700.0),
             rotation: Quat::from_rotation_x(-std::f32::consts::PI * 3.0),
@@ -47,9 +53,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         ..Default::default()
     });
-    commands.spawn(Svg3dBundle {
+    commands.spawn(SvgMesh3dBundle {
         svg,
-        origin: Origin::Center,
+        mesh_settings: SvgMesh3d {
+            origin: Origin::Center,
+            ..default()
+        },
         transform: Transform {
             translation: Vec3::new(0.0, 0.0, -800.0),
             rotation: Quat::from_rotation_x(-std::f32::consts::PI * 3.0),

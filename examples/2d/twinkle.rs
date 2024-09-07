@@ -23,9 +23,12 @@ fn main() {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let svg = asset_server.load("twinkle.svg");
     commands.spawn(Camera2dBundle::default());
-    commands.spawn(Svg2dBundle {
+    commands.spawn(SvgMesh2dBundle {
         svg,
-        origin: Origin::Center,
+        mesh_settings: SvgMesh2d {
+          origin: Origin::Center,
+          ..default()
+        },
         ..Default::default()
     });
 }

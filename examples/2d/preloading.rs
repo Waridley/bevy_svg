@@ -50,9 +50,12 @@ fn run(mut commands: Commands, asset_server: Res<AssetServer>, mut fsm: Local<Tu
             if *frames > 0 {
                 *fsm = TutorialFsm::Wait(handle.clone(), *frames - 1);
             } else if let Some(svg) = asset_server.get_handle("neutron_star.svg") {
-                commands.spawn(Svg2dBundle {
+                commands.spawn(SvgMesh2dBundle {
                     svg,
-                    origin: Origin::Center,
+                    mesh_settings: SvgMesh2d {
+                        origin: Origin::Center,
+                        ..default()
+                    },
                     ..Default::default()
                 });
 
