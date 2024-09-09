@@ -1,5 +1,10 @@
 //! Bevy [`Bundle`] representing an SVG entity.
 
+use crate::origin::Origin;
+use crate::render::SvgMesh3d;
+use crate::svg::Svg;
+use bevy::math::{Quat, Vec2};
+use bevy::prelude::{default, Component};
 use bevy::{
     asset::Handle,
     ecs::bundle::Bundle,
@@ -7,11 +12,6 @@ use bevy::{
     sprite::{ColorMaterial, Material2d, Mesh2dHandle},
     transform::components::{GlobalTransform, Transform},
 };
-use bevy::math::{Quat, Vec2};
-use bevy::prelude::{default, Component};
-use crate::origin::Origin;
-use crate::render::SvgMesh3d;
-use crate::svg::Svg;
 
 /// A Bevy [`Bundle`] representing an SVG entity.
 #[allow(missing_docs)]

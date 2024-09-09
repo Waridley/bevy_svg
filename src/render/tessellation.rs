@@ -1,13 +1,16 @@
+use bevy::math::Vec2;
 use bevy::{
     log::{debug, error},
     math::Vec3,
     transform::components::Transform,
 };
-use bevy::math::Vec2;
 use lyon_tessellation::{BuffersBuilder, FillOptions, FillTessellator, StrokeTessellator};
 
 use crate::{
-    render::{SvgMesh3d, vertex_buffer::{BufferExt, IndexType, Vertex, VertexBuffers, VertexConstructor}},
+    render::{
+        vertex_buffer::{BufferExt, IndexType, Vertex, VertexBuffers, VertexConstructor},
+        SvgMesh3d,
+    },
     svg::{DrawType, Svg},
 };
 
@@ -28,8 +31,10 @@ pub(crate) fn generate_buffer(
         Vec3::ZERO
     };
     let size = settings.size.unwrap_or(svg.size);
-    let scale = settings.size.map(|size| size / svg.size)
-      .unwrap_or(Vec2::ONE);
+    let scale = settings
+        .size
+        .map(|size| size / svg.size)
+        .unwrap_or(Vec2::ONE);
     let transform = Transform {
         translation: settings.rotation * (settings.origin.compute_translation(size) + front_z),
         rotation: settings.rotation,
@@ -53,16 +58,18 @@ pub(crate) fn generate_buffer(
         match path.draw_type {
             DrawType::Fill => {
                 if let Err(e) = fill_tess.tessellate(
-                    path.segments.clone(),
+                    path.segments.iter().copied(),
                     &FillOptions::tolerance(settings.tolerance),
                     &mut builder,
                 ) {
-                    error!("FillTessellator error: {:?}", e)
+                    error!("FillTessellator error: {}", e)
                 }
             }
             DrawType::Stroke(opts) => {
-                if let Err(e) = stroke_tess.tessellate(path.segments.clone(), &opts, &mut builder) {
-                    error!("StrokeTessellator error: {:?}", e)
+                if let Err(e) =
+                    stroke_tess.tessellate(path.segments.iter().copied(), &opts, &mut builder)
+                {
+                    error!("StrokeTessellator error: {}", e)
                 }
             }
         }

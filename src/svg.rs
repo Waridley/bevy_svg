@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use bevy::utils::HashMap;
 use bevy::{
     asset::{Asset, Handle},
     math::{Mat4, Vec2},
@@ -7,7 +8,6 @@ use bevy::{
     render::{color::Color, mesh::Mesh, render_resource::AsBindGroup},
     transform::components::Transform,
 };
-use bevy::utils::HashMap;
 use copyless::VecHelper;
 use lyon_geom::euclid::default::Transform2D;
 use lyon_path::PathEvent;
@@ -15,12 +15,8 @@ use lyon_tessellation::{math::Point, FillTessellator, StrokeTessellator};
 use svgtypes::ViewBox;
 use usvg::NodeExt;
 
-use crate::{
-    loader::FileSvgError,
-    render::tessellation,
-    Convert,
-};
 use crate::render::SvgMesh3d;
+use crate::{loader::FileSvgError, render::tessellation, Convert};
 
 /// A loaded and deserialized SVG file.
 #[derive(AsBindGroup, Reflect, Debug, Clone, Asset)]
@@ -76,13 +72,14 @@ impl Svg {
     }
 
     /// Creates a bevy mesh from the SVG data.
-    pub fn tessellate(&self, settings: &SvgMesh3d) -> Mesh {
-        let buffer = tessellation::generate_buffer(
-            self,
-            &mut FillTessellator::new(),
-            &mut StrokeTessellator::new(),
-            settings,
-        );
+    pub fn tessellate(
+        &self,
+        settings: &SvgMesh3d,
+        fill_tessellator: &mut FillTessellator,
+        stroke_tessellator: &mut StrokeTessellator,
+    ) -> Mesh {
+        let buffer =
+            tessellation::generate_buffer(self, fill_tessellator, stroke_tessellator, settings);
         buffer.convert()
     }
 

@@ -26,8 +26,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SvgMesh2dBundle {
         svg,
         mesh_settings: SvgMesh2d {
-          origin: Origin::Center,
-          ..default()
+            origin: Origin::Center,
+            ..default()
         },
         ..Default::default()
     });

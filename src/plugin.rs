@@ -14,6 +14,9 @@
 #[cfg(feature = "3d")]
 use std::ops::Deref;
 
+use bevy::prelude::Ref;
+#[cfg(feature = "2d")]
+use bevy::sprite::Mesh2dHandle;
 use bevy::{
     app::{App, Plugin},
     asset::{AssetEvent, Assets, Handle},
@@ -29,9 +32,6 @@ use bevy::{
     prelude::Last,
     render::mesh::Mesh,
 };
-use bevy::prelude::Ref;
-#[cfg(feature = "2d")]
-use bevy::sprite::Mesh2dHandle;
 
 use crate::{render, svg::Svg};
 
@@ -47,9 +47,7 @@ pub struct SvgRenderPlugin;
 
 impl Plugin for SvgRenderPlugin {
     fn build(&self, app: &mut App) {
-        app
-            // .add_systems(Last, (svg_mesh_linker.in_set(Set::SVG),))
-            .add_plugins(render::SvgPlugin);
+        app.add_plugins(render::SvgPlugin);
     }
 }
 

@@ -1,5 +1,7 @@
 //! Bevy [`Bundle`] representing an SVG entity.
 
+use crate::render::SvgMesh3d;
+use crate::svg::Svg;
 use bevy::{
     asset::Handle,
     ecs::bundle::Bundle,
@@ -10,8 +12,6 @@ use bevy::{
     },
     transform::components::{GlobalTransform, Transform},
 };
-use crate::render::SvgMesh3d;
-use crate::svg::Svg;
 
 /// A Bevy [`Bundle`] representing an SVG entity.
 #[allow(missing_docs)]
@@ -44,4 +44,3 @@ impl<M: Material> Default for SvgMesh3dBundle<M> {
         }
     }
 }
-

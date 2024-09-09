@@ -25,7 +25,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle::default());
     commands.spawn(SvgMesh2dBundle::<ColorMaterial> {
         svg,
-        mesh_settings: SvgMesh2d { origin: Origin::Center, ..default() },
+        mesh_settings: SvgMesh2d {
+            origin: Origin::Center,
+            ..default()
+        },
         transform: Transform {
             scale: Vec3::new(2.0, 2.0, 1.0),
             ..Default::default()

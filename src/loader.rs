@@ -35,11 +35,7 @@ impl AssetLoader for SvgAssetLoader {
                     path: load_context.path().display().to_string(),
                 })?;
 
-            let mut svg = Svg::from_bytes(
-                &bytes,
-                load_context.path(),
-                None::<&std::path::Path>,
-            )?;
+            let mut svg = Svg::from_bytes(&bytes, load_context.path(), None::<&std::path::Path>)?;
             let name = &load_context
                 .path()
                 .file_name()
