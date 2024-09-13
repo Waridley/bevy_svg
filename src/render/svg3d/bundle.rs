@@ -13,12 +13,13 @@ use bevy::{
     transform::components::{GlobalTransform, Transform},
 };
 
-/// A Bevy [`Bundle`] representing an SVG entity.
+/// A Bevy [`Bundle`] for generating a [Mesh] from an [Svg] asset.
 #[allow(missing_docs)]
 #[derive(Bundle)]
 pub struct SvgMesh3dBundle<M: Material = StandardMaterial> {
     pub svg: Handle<Svg>,
     pub mesh_settings: SvgMesh3d,
+    /// This placeholder will be replaced by the generated mesh handle.
     pub mesh: Handle<Mesh>,
     pub material: Handle<M>,
     pub transform: Transform,

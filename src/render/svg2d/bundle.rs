@@ -4,7 +4,7 @@ use crate::origin::Origin;
 use crate::render::SvgMesh3d;
 use crate::svg::Svg;
 use bevy::math::{Quat, Vec2};
-use bevy::prelude::{default, Component};
+use bevy::prelude::{default, Component, Mesh};
 use bevy::{
     asset::Handle,
     ecs::bundle::Bundle,
@@ -13,12 +13,13 @@ use bevy::{
     transform::components::{GlobalTransform, Transform},
 };
 
-/// A Bevy [`Bundle`] representing an SVG entity.
+/// A Bevy [`Bundle`] for generating a [Mesh2dHandle] from an [Svg] asset.
 #[allow(missing_docs)]
 #[derive(Bundle)]
 pub struct SvgMesh2dBundle<M: Material2d = ColorMaterial> {
     pub svg: Handle<Svg>,
     pub mesh_settings: SvgMesh2d,
+    /// This placeholder will be replaced by the generated mesh handle.
     pub mesh_2d: Mesh2dHandle,
     pub material_2d: Handle<M>,
     pub transform: Transform,
@@ -45,11 +46,24 @@ impl<M: Material2d> Default for SvgMesh2dBundle<M> {
     }
 }
 
+/// A component that defines how a [Mesh2dHandle] should be generated for a given entity.
+///
+/// Ideally any computed values should be computed once and re-used throughout the
+/// whole application, because [crate::render::resources::SvgMeshKey] will treat
+/// floating-point values as meaningless bits.
+///
+/// Because [bevy::sprite::Mesh2dHandle] is a simple wrapper around `Handle<Mesh>`,
+/// this type is converted to [crate::render::SvgMesh3d] for tesselation by setting
+/// `depth` to `None`, and `rotation` using [Quat::from_rotation_z].
 #[derive(Debug, Clone, Component)]
 pub struct SvgMesh2d {
+    /// Modify the origin of the generated [Mesh].
     pub origin: Origin,
+    /// Optionally override the computed size of the SVG by scaling vertices during tesselation.
     pub size: Option<Vec2>,
+    /// Rotates all vertices around the origin before finalizing the mesh.
     pub rotation: f32,
+    /// Tolerance passed to [lyon_tessellation::FillTessellator::tessellate].
     pub tolerance: f32,
 }
 
