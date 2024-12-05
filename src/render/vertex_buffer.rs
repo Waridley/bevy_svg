@@ -1,13 +1,13 @@
 use bevy::{
     math::Vec3,
     render::{
-        color::Color,
         mesh::{Indices, Mesh},
         render_asset::RenderAssetUsages,
         render_resource::PrimitiveTopology,
     },
     transform::components::Transform,
 };
+use bevy::color::{Color, ColorToComponents};
 use copyless::VecHelper;
 use lyon_tessellation::{
     self, FillVertex, FillVertexConstructor, StrokeVertex, StrokeVertexConstructor,
@@ -71,7 +71,7 @@ impl FillVertexConstructor<Vertex> for VertexConstructor {
 
         Vertex {
             position: [pos.x, pos.y, pos.z],
-            color: self.color.as_linear_rgba_f32(),
+            color: self.color.to_linear().to_f32_array(),
         }
     }
 }
@@ -84,7 +84,7 @@ impl StrokeVertexConstructor<Vertex> for VertexConstructor {
 
         Vertex {
             position: [pos.x, pos.y, pos.z],
-            color: self.color.as_linear_rgba_f32(),
+            color: self.color.to_linear().to_f32_array(),
         }
     }
 }

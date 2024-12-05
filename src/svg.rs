@@ -5,9 +5,10 @@ use bevy::{
     asset::{Asset, Handle},
     math::{Mat4, Vec2},
     reflect::{std_traits::ReflectDefault, Reflect},
-    render::{color::Color, mesh::Mesh, render_resource::AsBindGroup},
+    render::{mesh::Mesh, render_resource::AsBindGroup},
     transform::components::Transform,
 };
+use bevy::color::Color;
 use copyless::VecHelper;
 use lyon_geom::euclid::default::Transform2D;
 use lyon_path::PathEvent;

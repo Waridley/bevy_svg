@@ -1,5 +1,5 @@
 use bevy::{
-    asset::{io::Reader, AssetLoader, AsyncReadExt, BoxedFuture, LoadContext},
+    asset::{io::Reader, AssetLoader, AsyncReadExt,  LoadContext},
     log::debug,
     math::Vec2,
     reflect::{Reflect, ReflectDeserialize, ReflectSerialize},
@@ -18,37 +18,35 @@ impl AssetLoader for SvgAssetLoader {
     type Settings = ();
     type Error = FileSvgError;
 
-    fn load<'load>(
+    async fn load<'load>(
         &'load self,
-        reader: &'load mut Reader,
+        reader: &'load mut Reader<'_>,
         settings: &'load Self::Settings,
-        load_context: &'load mut LoadContext,
-    ) -> BoxedFuture<'load, Result<Self::Asset, Self::Error>> {
-        Box::pin(async move {
-            debug!("Parsing SVG: {} ...", load_context.path().display());
-            let mut bytes = Vec::new();
-            reader
-                .read_to_end(&mut bytes)
-                .await
-                .map_err(|e| FileSvgError {
-                    error: e.into(),
-                    path: load_context.path().display().to_string(),
-                })?;
+        load_context: &'load mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        debug!("Parsing SVG: {} ...", load_context.path().display());
+        let mut bytes = Vec::new();
+        reader
+            .read_to_end(&mut bytes)
+            .await
+            .map_err(|e| FileSvgError {
+                error: e.into(),
+                path: load_context.path().display().to_string(),
+            })?;
 
-            let mut svg = Svg::from_bytes(&bytes, load_context.path(), None::<&std::path::Path>)?;
-            let name = &load_context
-                .path()
-                .file_name()
-                .ok_or_else(|| FileSvgError {
-                    error: SvgError::InvalidFileName(load_context.path().display().to_string()),
-                    path: load_context.path().display().to_string(),
-                })?
-                .to_string_lossy();
-            svg.name = name.to_string();
-            debug!("Parsing SVG: {} ... Done", load_context.path().display());
+        let mut svg = Svg::from_bytes(&bytes, load_context.path(), None::<&std::path::Path>)?;
+        let name = &load_context
+            .path()
+            .file_name()
+            .ok_or_else(|| FileSvgError {
+                error: SvgError::InvalidFileName(load_context.path().display().to_string()),
+                path: load_context.path().display().to_string(),
+            })?
+            .to_string_lossy();
+        svg.name = name.to_string();
+        debug!("Parsing SVG: {} ... Done", load_context.path().display());
 
-            Ok(svg)
-        })
+        Ok(svg)
     }
 
     fn extensions(&self) -> &[&str] {
