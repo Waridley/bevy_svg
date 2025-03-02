@@ -67,8 +67,8 @@ fn svg_movement(
 ) {
     for (mut direction, mut transform) in &mut svg_position {
         match *direction {
-            Direction::Up => transform.translation.y += 150. * time.delta_seconds(),
-            Direction::Down => transform.translation.y -= 150. * time.delta_seconds(),
+            Direction::Up => transform.translation.y += 150. * time.delta_secs(),
+            Direction::Down => transform.translation.y -= 150. * time.delta_secs(),
         }
 
         if transform.translation.y > 200. {

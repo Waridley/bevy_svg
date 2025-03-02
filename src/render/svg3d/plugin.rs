@@ -27,19 +27,19 @@ pub fn svg_mesh_3d_generator(
     mut svg_events: EventReader<AssetEvent<Svg>>,
     svgs: Res<Assets<Svg>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    query: Query<(Entity, &SvgMesh3d, &Handle<Svg>, Option<&Handle<Mesh>>), Changed<SvgMesh3d>>,
+    query: Query<(Entity, &SvgMesh3d, Option<&Mesh3d>), Changed<SvgMesh3d>>,
     mut cache: ResMut<SvgMeshCache>,
     mut fill_tess: ResMut<FillTessellator>,
     mut stroke_tess: ResMut<StrokeTessellator>,
 ) {
-    for (id, settings, svg, existing_mesh) in &query {
+    for (id, settings, existing_mesh) in &query {
         let mesh = cache
-            .entry(svg.clone_weak())
+            .entry(settings.svg.clone_weak())
             .or_insert_with(HashMap::default)
             .entry(settings.clone().into())
             .or_insert_with(|| meshes.reserve_handle());
-        if existing_mesh != Some(mesh) {
-            cmds.entity(id).insert(mesh.clone());
+        if existing_mesh.map(|m3d| &m3d.0) != Some(mesh) {
+            cmds.entity(id).insert(Mesh3d(mesh.clone()));
         }
         let mesh = meshes.get_or_insert_with(mesh.id(), || {
             let mut mesh = Mesh::new(
@@ -49,7 +49,7 @@ pub fn svg_mesh_3d_generator(
             mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
             mesh
         });
-        if let Some(svg) = svgs.get(svg) {
+        if let Some(svg) = svgs.get(&settings.svg) {
             *mesh = svg.tessellate(settings, &mut fill_tess, &mut stroke_tess);
             debug!(?mesh);
         } else {
@@ -66,11 +66,12 @@ pub fn svg_mesh_3d_generator(
                     warn!(?id, "Svg asset is already missing");
                     continue;
                 };
+                let handle = Handle::Weak(*id);
                 let cache = cache
-                    .entry(Handle::Weak(*id))
+                    .entry(handle.clone())
                     .or_insert_with(HashMap::default);
                 for (key, mesh) in cache {
-                    let settings = SvgMesh3d::from(key.clone());
+                    let settings = SvgMesh3d::from((handle.clone(), key.clone()));
                     let mut mesh = meshes.get_or_insert_with(mesh.id(), || {
                         let mut mesh = Mesh::new(
                             PrimitiveTopology::TriangleList,

@@ -17,6 +17,7 @@ pub use svg3d::SvgMesh3dBundle;
 use crate::origin::Origin;
 pub use plugin::SvgPlugin;
 pub use resources::{FillTessellator, StrokeTessellator};
+use crate::svg::Svg;
 
 /// A component that defines how to generate a [Mesh] handle for a given entity.
 ///
@@ -25,6 +26,7 @@ pub use resources::{FillTessellator, StrokeTessellator};
 /// floating-point values as meaningless bits.
 #[derive(Debug, Clone, Component)]
 pub struct SvgMesh3d {
+    pub svg: Handle<Svg>,
     /// Modify the origin of the generated [Mesh].
     pub origin: Origin,
     /// Optionally override the computed size of the SVG by scaling vertices during tesselation.
@@ -43,6 +45,7 @@ pub struct SvgMesh3d {
 impl Default for SvgMesh3d {
     fn default() -> Self {
         Self {
+            svg: default(),
             origin: default(),
             size: None,
             depth: None,

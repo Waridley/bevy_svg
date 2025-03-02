@@ -4,12 +4,12 @@ use crate::origin::Origin;
 use crate::render::SvgMesh3d;
 use crate::svg::Svg;
 use bevy::math::{Quat, Vec2};
-use bevy::prelude::{default, Component, Mesh};
+use bevy::prelude::{default, Component, Mesh, MeshMaterial2d};
 use bevy::{
     asset::Handle,
     ecs::bundle::Bundle,
-    render::view::{InheritedVisibility, ViewVisibility, Visibility},
-    sprite::{ColorMaterial, Material2d, Mesh2dHandle},
+    render::{mesh::Mesh2d, view::{InheritedVisibility, ViewVisibility, Visibility}},
+    sprite::{ColorMaterial, Material2d},
     transform::components::{GlobalTransform, Transform},
 };
 
@@ -17,11 +17,10 @@ use bevy::{
 #[allow(missing_docs)]
 #[derive(Bundle)]
 pub struct SvgMesh2dBundle<M: Material2d = ColorMaterial> {
-    pub svg: Handle<Svg>,
     pub mesh_settings: SvgMesh2d,
     /// This placeholder will be replaced by the generated mesh handle.
-    pub mesh_2d: Mesh2dHandle,
-    pub material_2d: Handle<M>,
+    pub mesh_2d: Mesh2d,
+    pub material_2d: MeshMaterial2d<M>,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
     pub visibility: Visibility,
@@ -33,7 +32,6 @@ impl<M: Material2d> Default for SvgMesh2dBundle<M> {
     /// Creates a default [`SvgMesh2dBundle`].
     fn default() -> Self {
         Self {
-            svg: Default::default(),
             mesh_settings: Default::default(),
             mesh_2d: Default::default(),
             material_2d: Default::default(),
@@ -57,6 +55,7 @@ impl<M: Material2d> Default for SvgMesh2dBundle<M> {
 /// `depth` to `None`, and `rotation` using [Quat::from_rotation_z].
 #[derive(Debug, Clone, Component)]
 pub struct SvgMesh2d {
+    pub svg: Handle<Svg>,
     /// Modify the origin of the generated [Mesh].
     pub origin: Origin,
     /// Optionally override the computed size of the SVG by scaling vertices during tesselation.
@@ -70,6 +69,7 @@ pub struct SvgMesh2d {
 impl Default for SvgMesh2d {
     fn default() -> Self {
         Self {
+            svg: default(),
             origin: default(),
             size: None,
             rotation: default(),
@@ -81,6 +81,7 @@ impl Default for SvgMesh2d {
 impl From<SvgMesh2d> for SvgMesh3d {
     fn from(value: SvgMesh2d) -> Self {
         Self {
+            svg: value.svg,
             origin: value.origin,
             size: value.size,
             depth: None,

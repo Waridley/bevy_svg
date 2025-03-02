@@ -18,11 +18,11 @@ impl AssetLoader for SvgAssetLoader {
     type Settings = ();
     type Error = FileSvgError;
 
-    async fn load<'load>(
-        &'load self,
-        reader: &'load mut Reader<'_>,
-        settings: &'load Self::Settings,
-        load_context: &'load mut LoadContext<'_>,
+    async fn load(
+        &self,
+        reader: &mut dyn Reader,
+        settings: &Self::Settings,
+        load_context: & mut LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         debug!("Parsing SVG: {} ...", load_context.path().display());
         let mut bytes = Vec::new();

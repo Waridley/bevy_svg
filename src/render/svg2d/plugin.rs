@@ -9,7 +9,7 @@ use bevy::prelude::{
 };
 use bevy::render::mesh::PrimitiveTopology;
 use bevy::render::render_asset::RenderAssetUsages;
-use bevy::sprite::Mesh2dHandle;
+use bevy::render::mesh::Mesh2d;
 use bevy::utils::HashMap;
 use bevy::{
     app::{App, Plugin},
@@ -31,19 +31,19 @@ pub fn svg_mesh_2d_generator(
     mut svg_events: EventReader<AssetEvent<Svg>>,
     svgs: Res<Assets<Svg>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    query: Query<(Entity, &SvgMesh2d, &Handle<Svg>, Option<&Mesh2dHandle>), Changed<SvgMesh2d>>,
+    query: Query<(Entity, &SvgMesh2d, Option<&Mesh2d>), Changed<SvgMesh2d>>,
     mut cache: ResMut<SvgMeshCache>,
     mut fill_tess: ResMut<FillTessellator>,
     mut stroke_tess: ResMut<StrokeTessellator>,
 ) {
-    for (id, settings, svg, existing_mesh) in &query {
+    for (id, settings, existing_mesh) in &query {
         let mesh = cache
-            .entry(svg.clone_weak())
+            .entry(settings.svg.clone_weak())
             .or_insert_with(HashMap::default)
             .entry(settings.clone().into())
             .or_insert_with(|| meshes.reserve_handle());
-        if existing_mesh != Some(&Mesh2dHandle(mesh.clone())) {
-            cmds.entity(id).insert(Mesh2dHandle(mesh.clone()));
+        if existing_mesh != Some(&Mesh2d(mesh.clone())) {
+            cmds.entity(id).insert(Mesh2d(mesh.clone()));
         }
         let mesh = meshes.get_or_insert_with(mesh.id(), || {
             let mut mesh = Mesh::new(
@@ -53,7 +53,7 @@ pub fn svg_mesh_2d_generator(
             mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
             mesh
         });
-        if let Some(svg) = svgs.get(svg) {
+        if let Some(svg) = svgs.get(&settings.svg) {
             *mesh = svg.tessellate(
                 &settings.clone().into(),
                 &mut **fill_tess,
@@ -74,11 +74,12 @@ pub fn svg_mesh_2d_generator(
                     warn!(?id, "Svg asset is already missing");
                     continue;
                 };
+                let handle = Handle::Weak(*id);
                 let cache = cache
-                    .entry(Handle::Weak(*id))
+                    .entry(handle.clone())
                     .or_insert_with(HashMap::default);
                 for (key, mesh) in cache {
-                    let settings = SvgMesh3d::from(key.clone());
+                    let settings = SvgMesh3d::from((handle.clone(), key.clone()));
                     let mut mesh = meshes.get_or_insert_with(mesh.id(), || {
                         let mut mesh = Mesh::new(
                             PrimitiveTopology::TriangleList,

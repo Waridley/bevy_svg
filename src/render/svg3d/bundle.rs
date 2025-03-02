@@ -12,16 +12,16 @@ use bevy::{
     },
     transform::components::{GlobalTransform, Transform},
 };
+use bevy::prelude::{Mesh3d, MeshMaterial3d};
 
 /// A Bevy [`Bundle`] for generating a [Mesh] from an [Svg] asset.
 #[allow(missing_docs)]
 #[derive(Bundle)]
 pub struct SvgMesh3dBundle<M: Material = StandardMaterial> {
-    pub svg: Handle<Svg>,
     pub mesh_settings: SvgMesh3d,
     /// This placeholder will be replaced by the generated mesh handle.
-    pub mesh: Handle<Mesh>,
-    pub material: Handle<M>,
+    pub mesh: Mesh3d,
+    pub material: MeshMaterial3d<M>,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
     pub visibility: Visibility,
@@ -33,7 +33,6 @@ impl<M: Material> Default for SvgMesh3dBundle<M> {
     /// Creates a default [`SvgMesh3dBundle`].
     fn default() -> Self {
         Self {
-            svg: Default::default(),
             mesh_settings: Default::default(),
             mesh: Default::default(),
             material: Default::default(),

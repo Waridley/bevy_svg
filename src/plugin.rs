@@ -16,7 +16,7 @@ use std::ops::Deref;
 
 use bevy::prelude::Ref;
 #[cfg(feature = "2d")]
-use bevy::sprite::Mesh2dHandle;
+use bevy::render::mesh::Mesh2d;
 use bevy::{
     app::{App, Plugin},
     asset::{AssetEvent, Assets, Handle},
@@ -73,7 +73,7 @@ type SvgMeshComponents = (
 type SvgMeshComponents = (
     Entity,
     &'static Handle<Svg>,
-    Option<&'static mut Mesh2dHandle>,
+    Option<&'static mut Mesh2d>,
     Option<&'static mut Handle<Mesh>>,
     Option<render::SvgMesh3d>,
 );

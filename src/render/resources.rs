@@ -66,18 +66,19 @@ impl From<SvgMesh3d> for SvgMeshKey {
     }
 }
 
-impl From<SvgMeshKey> for SvgMesh2d {
-    fn from(value: SvgMeshKey) -> Self {
+impl From<(Handle<Svg>, SvgMeshKey)> for SvgMesh2d {
+    fn from((svg, key): (Handle<Svg>, SvgMeshKey)) -> Self {
         #[cfg(debug_assertions)]
-        if let Some(depth) = value.depth {
+        if let Some(depth) = key.depth {
             let depth = f32::from_bits(depth);
             warn!(
                 ?depth,
                 "Discarding depth when converting `SvgMeshKey` to `SvgMesh2d`"
             );
         }
-        let mesh_3d = SvgMesh3d::from(value);
+        let mesh_3d = SvgMesh3d::from((svg, key));
         Self {
+            svg: mesh_3d.svg,
             origin: mesh_3d.origin,
             size: mesh_3d.size,
             rotation: mesh_3d.rotation.to_euler(EulerRot::ZYX).0,
@@ -86,21 +87,22 @@ impl From<SvgMeshKey> for SvgMesh2d {
     }
 }
 
-impl From<SvgMeshKey> for SvgMesh3d {
-    fn from(value: SvgMeshKey) -> Self {
+impl From<(Handle<Svg>, SvgMeshKey)> for SvgMesh3d {
+    fn from((svg, key): (Handle<Svg>, SvgMeshKey)) -> Self {
         Self {
-            origin: value.origin,
-            size: value
+            svg,
+            origin: key.origin,
+            size: key
                 .size
                 .map(|size| Vec2::new(f32::from_bits(size[0]), f32::from_bits(size[1]))),
-            depth: value.depth.map(f32::from_bits),
+            depth: key.depth.map(f32::from_bits),
             rotation: Quat::from_xyzw(
-                f32::from_bits(value.rotation[0]),
-                f32::from_bits(value.rotation[1]),
-                f32::from_bits(value.rotation[2]),
-                f32::from_bits(value.rotation[3]),
+                f32::from_bits(key.rotation[0]),
+                f32::from_bits(key.rotation[1]),
+                f32::from_bits(key.rotation[2]),
+                f32::from_bits(key.rotation[3]),
             ),
-            tolerance: f32::from_bits(value.tolerance),
+            tolerance: f32::from_bits(key.tolerance),
         }
     }
 }
