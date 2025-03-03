@@ -2,7 +2,6 @@ use crate::plugin::Set;
 use crate::render::resources::SvgMeshCache;
 use crate::render::{FillTessellator, StrokeTessellator, SvgMesh3d};
 use crate::svg::Svg;
-use bevy::asset::StrongHandle;
 use bevy::prelude::*;
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
@@ -72,7 +71,7 @@ pub fn svg_mesh_3d_generator(
                     .or_insert_with(HashMap::default);
                 for (key, mesh) in cache {
                     let settings = SvgMesh3d::from((handle.clone(), key.clone()));
-                    let mut mesh = meshes.get_or_insert_with(mesh.id(), || {
+                    let mesh = meshes.get_or_insert_with(mesh.id(), || {
                         let mut mesh = Mesh::new(
                             PrimitiveTopology::TriangleList,
                             RenderAssetUsages::RENDER_WORLD,

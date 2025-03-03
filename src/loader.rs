@@ -1,15 +1,12 @@
 use bevy::{
-    asset::{io::Reader, AssetLoader, AsyncReadExt,  LoadContext},
+    asset::{io::Reader, AssetLoader, LoadContext},
     log::debug,
-    math::Vec2,
-    reflect::{Reflect, ReflectDeserialize, ReflectSerialize},
-    transform::components::Transform,
 };
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{origin::Origin, svg::Svg};
+use crate::svg::Svg;
 
+/// [AssetLoader] for `.svg` and `.svgz` files.
 #[derive(Default)]
 pub struct SvgAssetLoader;
 
@@ -21,7 +18,7 @@ impl AssetLoader for SvgAssetLoader {
     async fn load(
         &self,
         reader: &mut dyn Reader,
-        settings: &Self::Settings,
+        _settings: &Self::Settings,
         load_context: & mut LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         debug!("Parsing SVG: {} ...", load_context.path().display());

@@ -1,15 +1,10 @@
 //! Bevy [`Bundle`] representing an SVG entity.
 
 use crate::render::SvgMesh3d;
-use crate::svg::Svg;
 use bevy::{
-    asset::Handle,
     ecs::bundle::Bundle,
     pbr::{Material, StandardMaterial},
-    render::{
-        mesh::Mesh,
-        view::{InheritedVisibility, ViewVisibility, Visibility},
-    },
+    render::view::{InheritedVisibility, ViewVisibility, Visibility},
     transform::components::{GlobalTransform, Transform},
 };
 use bevy::prelude::{Mesh3d, MeshMaterial3d};

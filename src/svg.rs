@@ -1,8 +1,7 @@
 use std::path::PathBuf;
 
-use bevy::utils::HashMap;
 use bevy::{
-    asset::{Asset, Handle},
+    asset::Asset,
     math::{Mat4, Vec2},
     reflect::{std_traits::ReflectDefault, Reflect},
     render::{mesh::Mesh, render_resource::AsBindGroup},
@@ -93,7 +92,7 @@ impl Svg {
             match &*node.borrow() {
                 usvg::NodeKind::Path(path) => {
                     let t = node.abs_transform();
-                    let mut abs_t = Transform::from_matrix(Mat4::from_cols(
+                    let abs_t = Transform::from_matrix(Mat4::from_cols(
                         [t.a.abs() as f32, t.b as f32, 0.0, 0.0].into(),
                         [t.c as f32, t.d.abs() as f32, 0.0, 0.0].into(),
                         [0.0, 0.0, 1.0, 0.0].into(),
@@ -103,7 +102,7 @@ impl Svg {
                     if let Some(fill) = &path.fill {
                         let color = match fill.paint {
                             usvg::Paint::Color(c) => {
-                                Color::rgba_u8(c.red, c.green, c.blue, fill.opacity.to_u8())
+                                Color::srgba_u8(c.red, c.green, c.blue, fill.opacity.to_u8())
                             }
                             _ => Color::default(),
                         };
@@ -287,7 +286,7 @@ impl Convert<(Color, DrawType)> for &usvg::Stroke {
     #[inline]
     fn convert(self) -> (Color, DrawType) {
         let color = match self.paint {
-            usvg::Paint::Color(c) => Color::rgba_u8(c.red, c.green, c.blue, self.opacity.to_u8()),
+            usvg::Paint::Color(c) => Color::srgba_u8(c.red, c.green, c.blue, self.opacity.to_u8()),
             usvg::Paint::LinearGradient(_)
             | usvg::Paint::RadialGradient(_)
             | usvg::Paint::Pattern(_) => Color::default(),

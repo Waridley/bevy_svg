@@ -26,6 +26,7 @@ use crate::svg::Svg;
 /// floating-point values as meaningless bits.
 #[derive(Debug, Clone, Component)]
 pub struct SvgMesh3d {
+    /// Handle to the [Svg] asset.
     pub svg: Handle<Svg>,
     /// Modify the origin of the generated [Mesh].
     pub origin: Origin,

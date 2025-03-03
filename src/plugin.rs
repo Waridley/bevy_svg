@@ -11,25 +11,16 @@
 //! [`RenderWorld`](bevy::render::RenderWorld).
 //! Afterwards it is queued in the [`RenderSet::Queue`](bevy::render::RenderSet) for actual drawing/rendering.
 
-#[cfg(feature = "3d")]
-use std::ops::Deref;
 
-use bevy::prelude::Ref;
 #[cfg(feature = "2d")]
 use bevy::render::mesh::Mesh2d;
 use bevy::{
     app::{App, Plugin},
-    asset::{AssetEvent, Assets, Handle},
+    asset::Handle,
     ecs::{
         entity::Entity,
-        event::EventReader,
-        query::{Added, Changed, Or},
-        schedule::{IntoSystemConfigs, SystemSet},
-        system::{Commands, Query, Res, ResMut},
+        schedule::SystemSet,
     },
-    hierarchy::DespawnRecursiveExt,
-    log::debug,
-    prelude::Last,
     render::mesh::Mesh,
 };
 

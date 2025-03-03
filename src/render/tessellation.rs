@@ -75,7 +75,7 @@ pub(crate) fn generate_buffer(
         }
         #[cfg(feature = "3d")]
         if let Some(depth) = settings.depth {
-            let offset = (transform.rotation * (Vec3::NEG_Z * (depth * 0.5)));
+            let offset = transform.rotation * (Vec3::NEG_Z * (depth * 0.5));
             let vertices = buffer
                 .vertices
                 .iter()

@@ -4,7 +4,7 @@ use crate::origin::Origin;
 use crate::render::SvgMesh3d;
 use crate::svg::Svg;
 use bevy::math::{Quat, Vec2};
-use bevy::prelude::{default, Component, Mesh, MeshMaterial2d};
+use bevy::prelude::{default, Component, MeshMaterial2d};
 use bevy::{
     asset::Handle,
     ecs::bundle::Bundle,
@@ -55,6 +55,7 @@ impl<M: Material2d> Default for SvgMesh2dBundle<M> {
 /// `depth` to `None`, and `rotation` using [Quat::from_rotation_z].
 #[derive(Debug, Clone, Component)]
 pub struct SvgMesh2d {
+    /// Handle to the [Svg] asset.
     pub svg: Handle<Svg>,
     /// Modify the origin of the generated [Mesh].
     pub origin: Origin,
