@@ -65,7 +65,8 @@ pub(crate) fn generate_buffer(
                     error!("FillTessellator error: {}", e)
                 }
             }
-            DrawType::Stroke(opts) => {
+            DrawType::Stroke(mut opts) => {
+                opts.tolerance = settings.tolerance;
                 if let Err(e) =
                     stroke_tess.tessellate(path.segments.iter().copied(), &opts, &mut builder)
                 {
