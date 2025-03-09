@@ -38,11 +38,11 @@ mod svg;
 pub mod prelude {
     pub use super::SvgPlugin;
     #[cfg(any(feature = "2d", feature = "3d"))]
-    pub use crate::origin::Origin;
+    pub use crate::{origin::Origin, plugin::Set};
     #[cfg(feature = "2d")]
-    pub use crate::render::{SvgMesh2d, SvgMesh2dBundle};
+    pub use crate::render::{SvgMesh2d, SvgMesh2dBundle, svg_mesh_2d_generator};
     #[cfg(feature = "3d")]
-    pub use crate::render::{SvgMesh3d, SvgMesh3dBundle};
+    pub use crate::render::{SvgMesh3d, SvgMesh3dBundle, svg_mesh_3d_generator};
     pub use crate::svg::Svg;
     pub use lyon_tessellation::{
         FillOptions, FillRule, LineCap, LineJoin, Orientation, StrokeOptions,

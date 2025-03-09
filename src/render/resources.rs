@@ -1,6 +1,6 @@
 use crate::origin::Origin;
 use crate::prelude::{Svg, SvgMesh2d, SvgMesh3d};
-use bevy::asset::Handle;
+use bevy::asset::{Handle, RenderAssetUsages};
 use bevy::log::warn;
 use bevy::math::EulerRot;
 use bevy::prelude::*;
@@ -41,6 +41,7 @@ pub struct SvgMeshKey {
     depth: Option<u32>,
     rotation: [u32; 4],
     tolerance: u32,
+    usages: RenderAssetUsages,
 }
 
 impl From<SvgMesh2d> for SvgMeshKey {
@@ -62,6 +63,7 @@ impl From<SvgMesh3d> for SvgMeshKey {
                 value.rotation.w.to_bits(),
             ],
             tolerance: value.tolerance.to_bits(),
+            usages: value.usages,
         }
     }
 }
@@ -83,6 +85,7 @@ impl From<(Handle<Svg>, SvgMeshKey)> for SvgMesh2d {
             size: mesh_3d.size,
             rotation: mesh_3d.rotation.to_euler(EulerRot::ZYX).0,
             tolerance: mesh_3d.tolerance,
+            usages: mesh_3d.usages,
         }
     }
 }
@@ -103,6 +106,7 @@ impl From<(Handle<Svg>, SvgMeshKey)> for SvgMesh3d {
                 f32::from_bits(key.rotation[3]),
             ),
             tolerance: f32::from_bits(key.tolerance),
+            usages: key.usages,
         }
     }
 }

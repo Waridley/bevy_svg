@@ -12,6 +12,7 @@ use bevy::{
     sprite::{ColorMaterial, Material2d},
     transform::components::{GlobalTransform, Transform},
 };
+use bevy::asset::RenderAssetUsages;
 
 /// A Bevy [`Bundle`] for generating a [Mesh2dHandle] from an [Svg] asset.
 #[allow(missing_docs)]
@@ -65,6 +66,7 @@ pub struct SvgMesh2d {
     pub rotation: f32,
     /// Tolerance passed to [lyon_tessellation::FillTessellator::tessellate].
     pub tolerance: f32,
+    pub usages: RenderAssetUsages,
 }
 
 impl Default for SvgMesh2d {
@@ -75,6 +77,7 @@ impl Default for SvgMesh2d {
             size: None,
             rotation: default(),
             tolerance: 0.001,
+            usages: default(),
         }
     }
 }
@@ -88,6 +91,7 @@ impl From<SvgMesh2d> for SvgMesh3d {
             depth: None,
             rotation: Quat::from_rotation_z(value.rotation),
             tolerance: value.tolerance,
+            usages: value.usages,
         }
     }
 }

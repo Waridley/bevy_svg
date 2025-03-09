@@ -48,7 +48,7 @@ pub fn svg_mesh_2d_generator(
         let mesh = meshes.get_or_insert_with(mesh.id(), || {
             let mut mesh = Mesh::new(
                 PrimitiveTopology::TriangleList,
-                RenderAssetUsages::RENDER_WORLD,
+                settings.usages,
             );
             mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
             mesh
@@ -83,7 +83,7 @@ pub fn svg_mesh_2d_generator(
                     let mesh = meshes.get_or_insert_with(mesh.id(), || {
                         let mut mesh = Mesh::new(
                             PrimitiveTopology::TriangleList,
-                            RenderAssetUsages::RENDER_WORLD,
+                            settings.usages,
                         );
                         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
                         mesh
