@@ -41,12 +41,8 @@ pub fn svg_mesh_3d_generator(
             cmds.entity(id).insert(Mesh3d(mesh.clone()));
         }
         let mesh = meshes.get_or_insert_with(mesh.id(), || {
-            let mut mesh = Mesh::new(
-                PrimitiveTopology::TriangleList,
-                settings.usages,
-            );
-            mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
-            mesh
+            // Empty meshes panic in WASM in bevy 0.15
+            Rectangle::default().mesh().build()
         });
         if let Some(svg) = svgs.get(&settings.svg) {
             *mesh = svg.tessellate(settings, &mut fill_tess, &mut stroke_tess);
@@ -72,14 +68,13 @@ pub fn svg_mesh_3d_generator(
                 for (key, mesh) in cache {
                     let settings = SvgMesh3d::from((handle.clone(), key.clone()));
                     let mesh = meshes.get_or_insert_with(mesh.id(), || {
-                        let mut mesh = Mesh::new(
-                            PrimitiveTopology::TriangleList,
-                            settings.usages,
-                        );
-                        mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
-                        mesh
+                        Rectangle::default().mesh().build()
                     });
                     *mesh = svg.tessellate(&settings, &mut fill_tess, &mut stroke_tess);
+                    if mesh.count_vertices() == 0 {
+                        // Empty meshes panic in WASM in bevy 0.15
+                        *mesh = Rectangle::default().mesh().build();
+                    }
                     debug!(?mesh);
                 }
             }

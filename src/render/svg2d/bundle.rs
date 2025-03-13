@@ -19,8 +19,6 @@ use bevy::asset::RenderAssetUsages;
 #[derive(Bundle)]
 pub struct SvgMesh2dBundle<M: Material2d = ColorMaterial> {
     pub mesh_settings: SvgMesh2d,
-    /// This placeholder will be replaced by the generated mesh handle.
-    pub mesh_2d: Mesh2d,
     pub material_2d: MeshMaterial2d<M>,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
@@ -34,7 +32,6 @@ impl<M: Material2d> Default for SvgMesh2dBundle<M> {
     fn default() -> Self {
         Self {
             mesh_settings: Default::default(),
-            mesh_2d: Default::default(),
             material_2d: Default::default(),
             transform: Transform::default(),
             global_transform: GlobalTransform::default(),

@@ -4,9 +4,7 @@ use crate::render::{FillTessellator, StrokeTessellator, SvgMesh2d, SvgMesh3d};
 use crate::svg::Svg;
 use bevy::asset::{AssetEvent, Assets, Handle};
 use bevy::log::{debug, warn};
-use bevy::prelude::{
-    Changed, Commands, Entity, EventReader, IntoSystemConfigs, Last, Mesh, Query, Res, ResMut, Vec3,
-};
+use bevy::prelude::{Changed, Commands, Entity, EventReader, IntoSystemConfigs, Last, Mesh, Meshable, Query, Rectangle, Res, ResMut, Vec3, MeshBuilder};
 use bevy::render::mesh::PrimitiveTopology;
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::mesh::Mesh2d;
@@ -46,12 +44,8 @@ pub fn svg_mesh_2d_generator(
             cmds.entity(id).insert(Mesh2d(mesh.clone()));
         }
         let mesh = meshes.get_or_insert_with(mesh.id(), || {
-            let mut mesh = Mesh::new(
-                PrimitiveTopology::TriangleList,
-                settings.usages,
-            );
-            mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
-            mesh
+            // Empty meshes panic in WASM in bevy 0.15
+            Rectangle::default().mesh().build()
         });
         if let Some(svg) = svgs.get(&settings.svg) {
             *mesh = svg.tessellate(
@@ -89,6 +83,10 @@ pub fn svg_mesh_2d_generator(
                         mesh
                     });
                     *mesh = svg.tessellate(&settings, &mut **fill_tess, &mut **stroke_tess);
+                    if mesh.count_vertices() == 0 {
+                        // Empty meshes panic in WASM in bevy 0.15
+                        *mesh = Rectangle::default().mesh().build();
+                    }
                     debug!(?mesh);
                 }
             }

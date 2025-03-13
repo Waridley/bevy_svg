@@ -14,8 +14,6 @@ use bevy::prelude::{Mesh3d, MeshMaterial3d};
 #[derive(Bundle)]
 pub struct SvgMesh3dBundle<M: Material = StandardMaterial> {
     pub mesh_settings: SvgMesh3d,
-    /// This placeholder will be replaced by the generated mesh handle.
-    pub mesh: Mesh3d,
     pub material: MeshMaterial3d<M>,
     pub transform: Transform,
     pub global_transform: GlobalTransform,
@@ -29,7 +27,6 @@ impl<M: Material> Default for SvgMesh3dBundle<M> {
     fn default() -> Self {
         Self {
             mesh_settings: Default::default(),
-            mesh: Default::default(),
             material: Default::default(),
             transform: Transform::default(),
             global_transform: GlobalTransform::default(),
