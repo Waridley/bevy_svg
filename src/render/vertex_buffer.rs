@@ -1,13 +1,10 @@
 use bevy::{
+    asset::RenderAssetUsages,
+    color::{Color, ColorToComponents},
     math::Vec3,
-    render::{
-        mesh::{Indices, Mesh},
-        render_asset::RenderAssetUsages,
-        render_resource::PrimitiveTopology,
-    },
     transform::components::Transform,
 };
-use bevy::color::{Color, ColorToComponents};
+use bevy_mesh::{Indices, Mesh, PrimitiveTopology};
 use copyless::VecHelper;
 use lyon_tessellation::{
     self, FillVertex, FillVertexConstructor, StrokeVertex, StrokeVertexConstructor,
@@ -91,7 +88,6 @@ impl StrokeVertexConstructor<Vertex> for VertexConstructor {
 
 pub(crate) trait BufferExt<A> {
     fn extend_one(&mut self, item: A);
-    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T);
 }
 
 impl BufferExt<VertexBuffers> for VertexBuffers {
@@ -103,21 +99,6 @@ impl BufferExt<VertexBuffers> for VertexBuffers {
         }
         for idx in item.indices.into_iter() {
             self.indices.alloc().init(idx + offset);
-        }
-    }
-
-    fn extend<T: IntoIterator<Item = VertexBuffers>>(&mut self, iter: T) {
-        let mut offset = self.vertices.len() as u32;
-
-        for buf in iter.into_iter() {
-            let num_verts = buf.vertices.len() as u32;
-            for vert in buf.vertices.into_iter() {
-                self.vertices.alloc().init(vert);
-            }
-            for idx in buf.indices.into_iter() {
-                self.indices.alloc().init(idx + offset);
-            }
-            offset += num_verts;
         }
     }
 }

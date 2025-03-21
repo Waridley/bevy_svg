@@ -37,13 +37,13 @@ mod svg;
 /// Import this module as `use bevy_svg::prelude::*` to get convenient imports.
 pub mod prelude {
     pub use super::SvgPlugin;
+    #[cfg(feature = "2d")]
+    pub use crate::render::{svg_mesh_2d_generator, SvgMesh2d};
+    #[cfg(feature = "3d")]
+    pub use crate::render::{svg_mesh_3d_generator, SvgMesh3d};
+    pub use crate::svg::Svg;
     #[cfg(any(feature = "2d", feature = "3d"))]
     pub use crate::{origin::Origin, plugin::Set};
-    #[cfg(feature = "2d")]
-    pub use crate::render::{SvgMesh2d, SvgMesh2dBundle, svg_mesh_2d_generator};
-    #[cfg(feature = "3d")]
-    pub use crate::render::{SvgMesh3d, SvgMesh3dBundle, svg_mesh_3d_generator};
-    pub use crate::svg::Svg;
     pub use lyon_tessellation::{
         FillOptions, FillRule, LineCap, LineJoin, Orientation, StrokeOptions,
     };

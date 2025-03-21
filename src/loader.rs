@@ -19,7 +19,7 @@ impl AssetLoader for SvgAssetLoader {
         &self,
         reader: &mut dyn Reader,
         _settings: &Self::Settings,
-        load_context: & mut LoadContext<'_>,
+        load_context: &mut LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         debug!("Parsing SVG: {} ...", load_context.path().display());
         let mut bytes = Vec::new();

@@ -1,5 +1,4 @@
-use bevy::asset::LoadState;
-use bevy::prelude::*;
+use bevy::{asset::LoadState, prelude::*};
 use bevy_svg::prelude::*;
 
 #[path = "../common/lib.rs"]
@@ -7,7 +6,6 @@ mod common;
 
 fn main() {
     App::new()
-        .insert_resource(Msaa::Sample4)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "preloading".to_string(),
@@ -16,14 +14,14 @@ fn main() {
             }),
             ..Default::default()
         }))
-        .add_plugins((common::CommonPlugin, bevy_svg::prelude::SvgPlugin))
+        .add_plugins((common::CommonPlugin, SvgPlugin))
         .add_systems(Startup, setup)
         .add_systems(Update, run)
         .run();
 }
 
 fn setup(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn((Camera2d::default(), Msaa::Sample4));
 }
 
 #[derive(Default, Eq, PartialEq)]
@@ -50,13 +48,10 @@ fn run(mut commands: Commands, asset_server: Res<AssetServer>, mut fsm: Local<Tu
             if *frames > 0 {
                 *fsm = TutorialFsm::Wait(handle.clone(), *frames - 1);
             } else if let Some(svg) = asset_server.get_handle("neutron_star.svg") {
-                commands.spawn(SvgMesh2dBundle {
+                commands.spawn(SvgMesh2d {
                     svg,
-                    mesh_settings: SvgMesh2d {
-                        origin: Origin::Center,
-                        ..default()
-                    },
-                    ..Default::default()
+                    origin: Origin::Center,
+                    ..default()
                 });
 
                 *fsm = TutorialFsm::Loaded;

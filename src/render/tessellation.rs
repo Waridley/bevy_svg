@@ -1,7 +1,6 @@
-use bevy::math::Vec2;
 use bevy::{
     log::{debug, error},
-    math::Vec3,
+    math::{Vec2, Vec3},
     transform::components::Transform,
 };
 use lyon_tessellation::{BuffersBuilder, FillOptions, FillTessellator, StrokeTessellator};

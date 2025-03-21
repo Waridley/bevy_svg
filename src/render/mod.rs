@@ -8,17 +8,15 @@ mod svg2d;
 #[cfg(feature = "3d")]
 mod svg3d;
 
-use bevy::asset::RenderAssetUsages;
-use bevy::prelude::*;
+use bevy::{asset::RenderAssetUsages, prelude::*};
 #[cfg(feature = "2d")]
-pub use svg2d::{SvgMesh2d, SvgMesh2dBundle, svg_mesh_2d_generator};
+pub use svg2d::{svg_mesh_2d_generator, SvgMesh2d};
 #[cfg(feature = "3d")]
-pub use svg3d::{SvgMesh3dBundle, svg_mesh_3d_generator};
+pub use svg3d::svg_mesh_3d_generator;
 
-use crate::origin::Origin;
+use crate::{origin::Origin, svg::Svg};
 pub use plugin::SvgPlugin;
 pub use resources::{FillTessellator, StrokeTessellator};
-use crate::svg::Svg;
 
 /// A component that defines how to generate a [Mesh] handle for a given entity.
 ///

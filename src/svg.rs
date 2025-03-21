@@ -2,12 +2,12 @@ use std::path::PathBuf;
 
 use bevy::{
     asset::Asset,
+    color::Color,
     math::{Mat4, Vec2},
     reflect::{std_traits::ReflectDefault, Reflect},
-    render::{mesh::Mesh, render_resource::AsBindGroup},
     transform::components::Transform,
 };
-use bevy::color::Color;
+use bevy_mesh::Mesh;
 use copyless::VecHelper;
 use lyon_geom::euclid::default::Transform2D;
 use lyon_path::PathEvent;
@@ -15,11 +15,14 @@ use lyon_tessellation::{math::Point, FillTessellator, StrokeTessellator};
 use svgtypes::ViewBox;
 use usvg::NodeExt;
 
-use crate::render::SvgMesh3d;
-use crate::{loader::FileSvgError, render::tessellation, Convert};
+use crate::{
+    loader::FileSvgError,
+    render::{tessellation, SvgMesh3d},
+    Convert,
+};
 
 /// A loaded and deserialized SVG file.
-#[derive(AsBindGroup, Reflect, Debug, Clone, Asset)]
+#[derive(Reflect, Debug, Clone, Asset)]
 #[reflect(Default, Debug)]
 pub struct Svg {
     /// The name of the file.

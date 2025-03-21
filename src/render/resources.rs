@@ -1,10 +1,13 @@
-use crate::origin::Origin;
-use crate::prelude::{Svg, SvgMesh2d, SvgMesh3d};
-use bevy::asset::{Handle, RenderAssetUsages};
-use bevy::log::warn;
-use bevy::math::EulerRot;
-use bevy::prelude::*;
-use bevy::utils::HashMap;
+use crate::{
+    origin::Origin,
+    prelude::{Svg, SvgMesh2d, SvgMesh3d},
+};
+use bevy::{
+    asset::{Handle, RenderAssetUsages},
+    math::EulerRot,
+    prelude::*,
+    utils::HashMap,
+};
 
 /// Resource that wraps [lyon_tessellation::FillTessellator]. Can be replaced to
 /// change the default settings for all generated SVG meshes.
@@ -73,7 +76,7 @@ impl From<(Handle<Svg>, SvgMeshKey)> for SvgMesh2d {
         #[cfg(debug_assertions)]
         if let Some(depth) = key.depth {
             let depth = f32::from_bits(depth);
-            warn!(
+            bevy::log::warn!(
                 ?depth,
                 "Discarding depth when converting `SvgMeshKey` to `SvgMesh2d`"
             );

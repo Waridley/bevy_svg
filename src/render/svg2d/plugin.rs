@@ -1,17 +1,18 @@
-use crate::plugin::Set;
-use crate::render::resources::SvgMeshCache;
-use crate::render::{FillTessellator, StrokeTessellator, SvgMesh2d, SvgMesh3d};
-use crate::svg::Svg;
-use bevy::asset::{AssetEvent, Assets, Handle};
-use bevy::log::{debug, warn};
-use bevy::prelude::{Changed, Commands, Entity, EventReader, IntoSystemConfigs, Last, Mesh, Meshable, Query, Rectangle, Res, ResMut, Vec3, MeshBuilder};
-use bevy::render::mesh::PrimitiveTopology;
-use bevy::render::render_asset::RenderAssetUsages;
-use bevy::render::mesh::Mesh2d;
-use bevy::utils::HashMap;
+use crate::{
+    plugin::Set,
+    render::{resources::SvgMeshCache, FillTessellator, StrokeTessellator, SvgMesh2d, SvgMesh3d},
+    svg::Svg,
+};
 use bevy::{
     app::{App, Plugin},
-    asset::AssetApp,
+    asset::{AssetApp, AssetEvent, Assets, Handle},
+    log::{debug, warn},
+    prelude::{
+        Changed, Commands, Entity, EventReader, IntoSystemConfigs, Last, Mesh, MeshBuilder,
+        Meshable, Query, Rectangle, Res, ResMut, Vec3,
+    },
+    render::mesh::{Mesh2d, PrimitiveTopology},
+    utils::HashMap,
 };
 
 /// Plugin that renders [`Svg`](crate::svg::Svg)s in 2D
@@ -24,6 +25,7 @@ impl Plugin for RenderPlugin {
     }
 }
 
+/// System that generates and inserts [Mesh2d]'s for entities with [SvgMesh2d].
 pub fn svg_mesh_2d_generator(
     mut cmds: Commands,
     mut svg_events: EventReader<AssetEvent<Svg>>,
@@ -69,16 +71,11 @@ pub fn svg_mesh_2d_generator(
                     continue;
                 };
                 let handle = Handle::Weak(*id);
-                let cache = cache
-                    .entry(handle.clone())
-                    .or_insert_with(HashMap::default);
+                let cache = cache.entry(handle.clone()).or_insert_with(HashMap::default);
                 for (key, mesh) in cache {
                     let settings = SvgMesh3d::from((handle.clone(), key.clone()));
                     let mesh = meshes.get_or_insert_with(mesh.id(), || {
-                        let mut mesh = Mesh::new(
-                            PrimitiveTopology::TriangleList,
-                            settings.usages,
-                        );
+                        let mut mesh = Mesh::new(PrimitiveTopology::TriangleList, settings.usages);
                         mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
                         mesh
                     });

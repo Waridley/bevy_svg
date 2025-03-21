@@ -1,14 +1,13 @@
-use crate::plugin::Set;
-use crate::render::resources::SvgMeshCache;
-use crate::render::{FillTessellator, StrokeTessellator, SvgMesh3d};
-use crate::svg::Svg;
-use bevy::prelude::*;
-use bevy::render::render_asset::RenderAssetUsages;
-use bevy::render::render_resource::PrimitiveTopology;
-use bevy::utils::HashMap;
+use crate::{
+    plugin::Set,
+    render::{resources::SvgMeshCache, FillTessellator, StrokeTessellator, SvgMesh3d},
+    svg::Svg,
+};
 use bevy::{
     app::{App, Plugin},
     asset::AssetApp,
+    prelude::*,
+    utils::HashMap,
 };
 
 /// Plugin that renders [`Svg`](crate::svg::Svg)s in 2D
@@ -21,6 +20,7 @@ impl Plugin for RenderPlugin {
     }
 }
 
+/// System that generates and inserts [Mesh3d]'s for entities with [SvgMesh3d].
 pub fn svg_mesh_3d_generator(
     mut cmds: Commands,
     mut svg_events: EventReader<AssetEvent<Svg>>,
@@ -62,14 +62,11 @@ pub fn svg_mesh_3d_generator(
                     continue;
                 };
                 let handle = Handle::Weak(*id);
-                let cache = cache
-                    .entry(handle.clone())
-                    .or_insert_with(HashMap::default);
+                let cache = cache.entry(handle.clone()).or_insert_with(HashMap::default);
                 for (key, mesh) in cache {
                     let settings = SvgMesh3d::from((handle.clone(), key.clone()));
-                    let mesh = meshes.get_or_insert_with(mesh.id(), || {
-                        Rectangle::default().mesh().build()
-                    });
+                    let mesh = meshes
+                        .get_or_insert_with(mesh.id(), || Rectangle::default().mesh().build());
                     *mesh = svg.tessellate(&settings, &mut fill_tess, &mut stroke_tess);
                     if mesh.count_vertices() == 0 {
                         // Empty meshes panic in WASM in bevy 0.15

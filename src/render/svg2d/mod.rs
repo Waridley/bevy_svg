@@ -1,5 +1,5 @@
 mod bundle;
 mod plugin;
 
-pub use bundle::{SvgMesh2d, SvgMesh2dBundle};
-pub use plugin::{RenderPlugin, svg_mesh_2d_generator};
+pub use bundle::SvgMesh2d;
+pub use plugin::{svg_mesh_2d_generator, RenderPlugin};

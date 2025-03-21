@@ -1,46 +1,11 @@
 //! Bevy [`Bundle`] representing an SVG entity.
 
-use crate::origin::Origin;
-use crate::render::SvgMesh3d;
-use crate::svg::Svg;
-use bevy::math::{Quat, Vec2};
-use bevy::prelude::{default, Component, MeshMaterial2d};
+use crate::{origin::Origin, render::SvgMesh3d, svg::Svg};
 use bevy::{
-    asset::Handle,
-    ecs::bundle::Bundle,
-    render::{mesh::Mesh2d, view::{InheritedVisibility, ViewVisibility, Visibility}},
-    sprite::{ColorMaterial, Material2d},
-    transform::components::{GlobalTransform, Transform},
+    asset::{Handle, RenderAssetUsages},
+    math::{Quat, Vec2},
+    prelude::{default, Component},
 };
-use bevy::asset::RenderAssetUsages;
-
-/// A Bevy [`Bundle`] for generating a [Mesh2dHandle] from an [Svg] asset.
-#[allow(missing_docs)]
-#[derive(Bundle)]
-pub struct SvgMesh2dBundle<M: Material2d = ColorMaterial> {
-    pub mesh_settings: SvgMesh2d,
-    pub material_2d: MeshMaterial2d<M>,
-    pub transform: Transform,
-    pub global_transform: GlobalTransform,
-    pub visibility: Visibility,
-    pub inherited_visibility: InheritedVisibility,
-    pub view_visibility: ViewVisibility,
-}
-
-impl<M: Material2d> Default for SvgMesh2dBundle<M> {
-    /// Creates a default [`SvgMesh2dBundle`].
-    fn default() -> Self {
-        Self {
-            mesh_settings: Default::default(),
-            material_2d: Default::default(),
-            transform: Transform::default(),
-            global_transform: GlobalTransform::default(),
-            visibility: Visibility::default(),
-            inherited_visibility: InheritedVisibility::default(),
-            view_visibility: ViewVisibility::default(),
-        }
-    }
-}
 
 /// A component that defines how a [Mesh2dHandle] should be generated for a given entity.
 ///
@@ -63,6 +28,7 @@ pub struct SvgMesh2d {
     pub rotation: f32,
     /// Tolerance passed to [lyon_tessellation::FillTessellator::tessellate].
     pub tolerance: f32,
+    /// The [RenderAssetUsages] for the generated mesh.
     pub usages: RenderAssetUsages,
 }
 
