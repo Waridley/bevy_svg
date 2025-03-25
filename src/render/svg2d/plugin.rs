@@ -14,8 +14,9 @@ use bevy::{
     render::mesh::{Mesh2d, PrimitiveTopology},
     utils::HashMap,
 };
+use bevy::utils::HashSet;
 
-/// Plugin that renders [`Svg`](crate::svg::Svg)s in 2D
+/// Plugin that renders [`Svg`](crate::svg::Svg)'s in 2D
 pub struct RenderPlugin;
 
 impl Plugin for RenderPlugin {
@@ -25,7 +26,7 @@ impl Plugin for RenderPlugin {
     }
 }
 
-/// System that generates and inserts [Mesh2d]'s for entities with [SvgMesh2d].
+/// System that generates and inserts [`Mesh2d`]'s for entities with [`SvgMesh2d`].
 pub fn svg_mesh_2d_generator(
     mut cmds: Commands,
     mut svg_events: EventReader<AssetEvent<Svg>>,
@@ -46,6 +47,7 @@ pub fn svg_mesh_2d_generator(
             cmds.entity(id).insert(Mesh2d(mesh.clone()));
         }
         let mesh = meshes.get_or_insert_with(mesh.id(), || {
+            debug!("Mesh does not yet exist. Inserting default rectangle to prevent panics on WASM.");
             // Empty meshes panic in WASM in bevy 0.15
             Rectangle::default().mesh().build()
         });
@@ -61,36 +63,42 @@ pub fn svg_mesh_2d_generator(
         }
     }
 
-    for event in svg_events.read() {
+    let to_update = svg_events.read().filter_map(|event| {
         match event {
             AssetEvent::Added { id }
             | AssetEvent::LoadedWithDependencies { id }
             | AssetEvent::Modified { id } => {
-                let Some(svg) = svgs.get(*id) else {
-                    warn!(?id, "Svg asset is already missing");
-                    continue;
-                };
-                let handle = Handle::Weak(*id);
-                let cache = cache.entry(handle.clone()).or_insert_with(HashMap::default);
-                for (key, mesh) in cache {
-                    let settings = SvgMesh3d::from((handle.clone(), key.clone()));
-                    let mesh = meshes.get_or_insert_with(mesh.id(), || {
-                        let mut mesh = Mesh::new(PrimitiveTopology::TriangleList, settings.usages);
-                        mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
-                        mesh
-                    });
-                    *mesh = svg.tessellate(&settings, &mut **fill_tess, &mut **stroke_tess);
-                    if mesh.count_vertices() == 0 {
-                        // Empty meshes panic in WASM in bevy 0.15
-                        *mesh = Rectangle::default().mesh().build();
-                    }
-                    debug!(?mesh);
-                }
+                Some(*id)
             }
             AssetEvent::Removed { id } => {
                 cache.remove(&Handle::Weak(*id));
+                None
             }
-            AssetEvent::Unused { .. } => {}
+            AssetEvent::Unused { .. } => None,
+        }
+    }).collect::<HashSet<_>>();
+    
+    for id in to_update {
+        let Some(svg) = svgs.get(id) else {
+            warn!(?id, "Svg asset is already unloaded");
+            continue;
+        };
+        let handle = Handle::Weak(id);
+        let cache = cache.entry(handle.clone()).or_insert_with(HashMap::default);
+        for (key, mesh) in cache {
+            let settings = SvgMesh3d::from((handle.clone(), key.clone()));
+            let mesh = meshes.get_or_insert_with(mesh.id(), || {
+                let mut mesh = Mesh::new(PrimitiveTopology::TriangleList, settings.usages);
+                mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, Vec::<Vec3>::new());
+                mesh
+            });
+            *mesh = svg.tessellate(&settings, &mut **fill_tess, &mut **stroke_tess);
+            if mesh.count_vertices() == 0 {
+                warn!(?id, "Failed to tessellate Svg. Using default rectangle to prevent panics on WASM.");
+                // Empty meshes panic in WASM in bevy 0.15
+                *mesh = Rectangle::default().mesh().build();
+            }
+            debug!(?mesh);
         }
     }
 }
