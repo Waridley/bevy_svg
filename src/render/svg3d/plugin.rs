@@ -6,9 +6,11 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::AssetApp,
+    ecs::schedule::IntoScheduleConfigs,
+    log::{debug, warn},
     prelude::*,
-    utils::{HashMap, HashSet},
 };
+use std::collections::{HashMap, HashSet};
 
 /// Plugin that renders [`Svg`](crate::svg::Svg)'s in 2D
 pub struct RenderPlugin;

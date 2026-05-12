@@ -6,14 +6,15 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::{AssetApp, AssetEvent, Assets, Handle},
+    ecs::schedule::IntoScheduleConfigs,
     log::{debug, warn},
     prelude::{
-        Changed, Commands, Entity, EventReader, IntoSystemConfigs, Last, Mesh, MeshBuilder,
-        Meshable, Query, Rectangle, Res, ResMut, Vec3,
+        Changed, Commands, Entity, EventReader, Last, Mesh, MeshBuilder, Meshable, Query,
+        Rectangle, Res, ResMut, Vec3,
     },
     render::mesh::{Mesh2d, PrimitiveTopology},
-    utils::{HashMap, HashSet},
 };
+use std::collections::{HashMap, HashSet};
 
 /// Plugin that renders [`Svg`](crate::svg::Svg)'s in 2D
 pub struct RenderPlugin;

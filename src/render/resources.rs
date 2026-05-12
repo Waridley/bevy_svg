@@ -6,8 +6,8 @@ use bevy::{
     asset::{Handle, RenderAssetUsages},
     math::EulerRot,
     prelude::*,
-    utils::HashMap,
 };
+use std::collections::HashMap;
 
 /// Resource that wraps [lyon_tessellation::FillTessellator]. Can be replaced to
 /// change the default settings for all generated SVG meshes.
