@@ -12,9 +12,8 @@ use bevy::{
         Meshable, Query, Rectangle, Res, ResMut, Vec3,
     },
     render::mesh::{Mesh2d, PrimitiveTopology},
-    utils::HashMap,
+    utils::{HashMap, HashSet},
 };
-use bevy::utils::HashSet;
 
 /// Plugin that renders [`Svg`](crate::svg::Svg)'s in 2D
 pub struct RenderPlugin;
@@ -47,7 +46,9 @@ pub fn svg_mesh_2d_generator(
             cmds.entity(id).insert(Mesh2d(mesh.clone()));
         }
         let mesh = meshes.get_or_insert_with(mesh.id(), || {
-            debug!("Mesh does not yet exist. Inserting default rectangle to prevent panics on WASM.");
+            debug!(
+                "Mesh does not yet exist. Inserting default rectangle to prevent panics on WASM."
+            );
             // Empty meshes panic in WASM in bevy 0.15
             Rectangle::default().mesh().build()
         });
@@ -63,21 +64,20 @@ pub fn svg_mesh_2d_generator(
         }
     }
 
-    let to_update = svg_events.read().filter_map(|event| {
-        match event {
+    let to_update = svg_events
+        .read()
+        .filter_map(|event| match event {
             AssetEvent::Added { id }
             | AssetEvent::LoadedWithDependencies { id }
-            | AssetEvent::Modified { id } => {
-                Some(*id)
-            }
+            | AssetEvent::Modified { id } => Some(*id),
             AssetEvent::Removed { id } => {
                 cache.remove(&Handle::Weak(*id));
                 None
             }
             AssetEvent::Unused { .. } => None,
-        }
-    }).collect::<HashSet<_>>();
-    
+        })
+        .collect::<HashSet<_>>();
+
     for id in to_update {
         let Some(svg) = svgs.get(id) else {
             warn!(?id, "Svg asset is already unloaded");
@@ -94,7 +94,10 @@ pub fn svg_mesh_2d_generator(
             });
             *mesh = svg.tessellate(&settings, &mut **fill_tess, &mut **stroke_tess);
             if mesh.count_vertices() == 0 {
-                warn!(?id, "Failed to tessellate Svg. Using default rectangle to prevent panics on WASM.");
+                warn!(
+                    ?id,
+                    "Failed to tessellate Svg. Using default rectangle to prevent panics on WASM."
+                );
                 // Empty meshes panic in WASM in bevy 0.15
                 *mesh = Rectangle::default().mesh().build();
             }
